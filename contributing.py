@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
         if files:
             contrib_files = [f for f in files.keys() if
-                             f[0].startswith('CONTRIBUTING')]
+                             f.startswith('CONTRIBUTING')]
         else:
             contrib_files = None
 
