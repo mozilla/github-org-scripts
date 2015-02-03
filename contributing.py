@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import sys
 
-from client import get_github_client
+from client import get_github3_client
 
 if __name__ == '__main__':
-    gh = get_github_client()
+    gh = get_github3_client()
 
     # Divvy up into repositories that need/do not need a CONTRIBUTING file.
     good_repos = []
