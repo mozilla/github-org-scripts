@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 import sys
 
-from github3 import login
-
-
-CREDENTIALS_FILE = '.credentials'
-
+from client import get_github_client
 
 if __name__ == '__main__':
-    id = token = ''
-    with open(CREDENTIALS_FILE, 'r') as cf:
-        id = cf.readline().strip()
-        token = cf.readline().strip()
-
-    gh = login(token=token)
+    gh = get_github_client()
 
     # Divvy up into repositories that need/do not need a CONTRIBUTING file.
     good_repos = []
