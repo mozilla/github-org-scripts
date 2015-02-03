@@ -3,13 +3,9 @@ import urllib
 
 import requests
 
-from client import get_token, get_github3_client
+from client import get_token
 
 if __name__ == '__main__':
-    # only using this for members_urlt
-    gh = get_github3_client()
-
-    # the rest is raw requests.get
     headers = {
         'Accept': 'application/vnd.github.moondragon+json',
         'Authorization': 'token %s' % get_token()
@@ -18,7 +14,7 @@ if __name__ == '__main__':
               'role': 'admin'}
 
     admins_with_1fa_url = '%s?%s' % (
-        gh.organization('mozilla').members_urlt.expand(),
+        'https://api.github.com/orgs/%s/members' % 'mozilla',
         urllib.urlencode(params)
     )
     resp = requests.get(admins_with_1fa_url, headers=headers)
