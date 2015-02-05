@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from datetime import datetime
+import getopt
 import urllib
+import sys
 
 import requests
 
@@ -12,12 +14,19 @@ def _parse_github_datetime(datetime_string):
         pass
 
 
-if __name__ == '__main__':
+def usage():
+    print "python repo-pr-stats.py <owner> <repo>"
+
+
+def main(argv):
+    owner = argv[0]
+    repo = argv[1]
+
     params = {'state': 'closed',
               'per_page': 100}
 
     all_pulls_url = '%s?%s' % (
-        'https://api.github.com/repos/%s/%s/pulls' % ('mozilla', 'kuma'),
+        'https://api.github.com/repos/%s/%s/pulls' % (owner, repo),
         urllib.urlencode(params)
     )
     resp = requests.get(all_pulls_url)
@@ -34,3 +43,9 @@ if __name__ == '__main__':
 
     print "Total Average Review Time (%s pulls): " % len(review_times)
     print reduce(lambda x, y: x + y, review_times) / len(review_times)
+
+if __name__ == '__main__':
+    if len(sys.argv) is not 3:
+        usage()
+    else:
+        main(sys.argv[1:])
