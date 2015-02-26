@@ -10,13 +10,18 @@ Analyze all the "sources" repositories (i.e., those that aren't forks) in a gith
 Show all org admins *WITHOUT* [Two-Factor
 Auth](https://help.github.com/articles/about-two-factor-authentication/) enabled
 
-### audit-log-export.js
-Sadly, the org audit log does not have an API. So here's a little bit of JavaScript you can run on any audit log page to export the data into a somewhat more digestible JSON format.
+### Audit logs
+Sadly, the org audit log does not have an API, so we'll screen scrape a little.
+
+#### audit-log-export.js
+So here's a little bit of JavaScript you can run on any audit log page to export the data into a somewhat more digestible JSON format.
 
 Example URL: https://github.com/orgs/acmecorp/audit-log
 
 Yes, you have to go to the next page and re-run this to get another file.
 
+#### hooks.py
+Analyzes a list of audit log export files (from the JS script) for hook/service creation/deletion and provides a summary. Use it to show commonly used apps/services/webhooks across the org.
 
 ## Auth
 The API calls need you to authenticate. Generate a "personal access token" on the github settings page, then create a file ``.credentials`` like this:
