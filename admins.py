@@ -22,4 +22,4 @@ if __name__ == '__main__':
     bad_admins = resp.json()
     print 'The following admins DO NOT HAVE 2FA:'
     for a in bad_admins:
-        print a.username
+        print a['login']
