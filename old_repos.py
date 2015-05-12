@@ -8,7 +8,13 @@ import requests
 
 from client import get_token
 
+
 CACHEFILE = 'cache/mozilla_all_repos.json'
+
+
+def parse_timestamp(tst):
+    return datetime.strptime(tst, '%Y-%m-%dT%H:%M:%SZ')
+
 
 if __name__ == '__main__':
     headers = {
@@ -38,22 +44,28 @@ if __name__ == '__main__':
 
         open(CACHEFILE, 'w').write(json.dumps(repos))
 
-    # Find small/empty repos.
-    small_repos = filter(lambda r: r['size'] < 50, repos)
+    # Find small/empty repos older than a month.
+    SMALL_MINAGE = 31
+    small_repos = filter(lambda r: (
+        r['size'] < 50 and
+        r['open_issues_count'] == 0 and
+        parse_timestamp(r['updated_at']) + timedelta(days=SMALL_MINAGE) < datetime.now()),
+        repos)
     small_repos.sort(key=lambda r: r['name'])
-    print '## %s small/empty repositories' % len(small_repos)
+    print '## %s small/empty repositories older than %s days' % (
+        len(small_repos), SMALL_MINAGE)
     for repo in small_repos:
-        print repo['name'], ':', repo['size']
+        print repo['name'], ':', repo['size'], '(%s)' % repo['updated_at']
 
     print '\n\n'
 
     # Find recently untouched repos.
-    YEARS = 2
+    UNTOUCHED_MINAGE = 2 * 365
     old_repos = filter(lambda r: (
-        datetime.strptime(r['updated_at'], '%Y-%m-%dT%H:%M:%SZ') +
-        timedelta(days=(365 * YEARS)) < datetime.now()), repos)
+        parse_timestamp(r['updated_at']) +
+        timedelta(days=(UNTOUCHED_MINAGE)) < datetime.now()), repos)
     old_repos.sort(key=lambda r: r['name'])
-    print '## %s repos touched less recently than %s years ago.' % (
-        len(old_repos), YEARS)
+    print '## %s repos touched less recently than %s days ago.' % (
+        len(old_repos), UNTOUCHED_MINAGE)
     for repo in old_repos:
         print repo['name'], ':', repo['updated_at']
