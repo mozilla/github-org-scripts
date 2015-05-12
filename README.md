@@ -23,6 +23,9 @@ Yes, you have to go to the next page and re-run this to get another file.
 #### hooks.py
 Analyzes a list of audit log export files (from the JS script) for hook/service creation/deletion and provides a summary. Use it to show commonly used apps/services/webhooks across the org.
 
+### old_repos.py
+Generate a list of empty (should be deleted) repositories as well as untoched repos (might need to be archived).
+
 ## Auth
 The API calls need you to authenticate. Generate a "personal access token" on the github settings page, then create a file ``.credentials`` like this:
 
