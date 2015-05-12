@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # Find small/empty repos.
     small_repos = filter(lambda r: r['size'] < 50, repos)
     small_repos.sort(key=lambda r: r['name'])
-    print '## Small/empty repositories'
+    print '## %s small/empty repositories' % len(small_repos)
     for repo in small_repos:
         print repo['name'], ':', repo['size']
 
@@ -53,6 +53,7 @@ if __name__ == '__main__':
         datetime.strptime(r['updated_at'], '%Y-%m-%dT%H:%M:%SZ') +
         timedelta(days=(365 * YEARS)) < datetime.now()), repos)
     old_repos.sort(key=lambda r: r['name'])
-    print '## Repos touched less recently than %s years ago.' % YEARS
+    print '## %s repos touched less recently than %s years ago.' % (
+        len(old_repos), YEARS)
     for repo in old_repos:
         print repo['name'], ':', repo['updated_at']
