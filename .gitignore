@@ -1,1 +1,3 @@
-.credentials
+*\.py[oc]
+\.credentials
+cache/*\.json
