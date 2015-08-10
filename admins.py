@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # for orgs that don't yet support the new API, the 'role' filter is
     # not honored. Filter those out by checking the 'site_admin' key.
     real_admins = [x for x in bad_admins if x['site_admin']]
-    if len(real_admins):
+    if real_admins:
         print 'The following admins DO NOT HAVE 2FA:'
         for a in real_admins:
             print a['login']
