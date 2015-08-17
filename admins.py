@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def check_admins(org):
     headers = {
-        # new api requires new accept per
+        # New API requires new accept per
         # https://developer.github.com/changes/2015-06-24-api-enhancements-for-working-with-organization-permissions/#preview-period
         'Accept': 'application/vnd.github.ironman-preview+json',
         'Authorization': 'token %s' % get_token()
@@ -24,14 +24,14 @@ def check_admins(org):
         urllib.urlencode(params)
     )
     resp = requests.get(admins_with_1fa_url, headers=headers)
-    if resp.status_code not in [200,]:
+    if resp.status_code not in (200,):
         logging.warn("Failed request for %s (code %d)", org,
-                resp.status_code)
+                     resp.status_code)
         return
 
     bad_admins = resp.json()
 
-    # for orgs that don't yet support the new API, the 'role' filter is
+    # For orgs that don't yet support the new API, the 'role' filter is
     # not honored. Filter those out by checking the 'site_admin' key.
     real_admins = [x for x in bad_admins if x['site_admin']]
     if real_admins:
@@ -46,7 +46,7 @@ def check_admins(org):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("orgs", nargs='*', default=['mozilla',],
-            help='github organizations to check (defaults to mozilla)')
+                        help='github organizations to check (defaults to mozilla)')
     return parser.parse_args()
 
 
