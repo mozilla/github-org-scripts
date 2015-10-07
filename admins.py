@@ -9,6 +9,7 @@ from client import get_token
 
 logger = logging.getLogger(__name__)
 
+
 def check_admins(org):
     headers = {
         # New API requires new accept per
@@ -29,11 +30,8 @@ def check_admins(org):
                      resp.status_code)
         return
 
-    bad_admins = resp.json()
+    real_admins = resp.json()
 
-    # For orgs that don't yet support the new API, the 'role' filter is
-    # not honored. Filter those out by checking the 'site_admin' key.
-    real_admins = [x for x in bad_admins if x['site_admin']]
     if real_admins:
         print 'The following admins DO NOT HAVE 2FA for org %s:' % org
         for a in real_admins:
@@ -42,10 +40,9 @@ def check_admins(org):
         print 'Congrats! All admins have 2FA enabled in %s!' % org
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("orgs", nargs='*', default=['mozilla',],
+    parser.add_argument("orgs", nargs='*', default=['mozilla', ],
                         help='github organizations to check (defaults to mozilla)')
     return parser.parse_args()
 
