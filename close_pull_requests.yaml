@@ -1,0 +1,23 @@
+# YAML file to give repositories and text to close PRs with
+
+---
+
+# organization/owner
+# repository
+# close - boolean - close any open PR
+# lock - boolean - lock further discussion (must be done manually, but
+#                  URL provided)
+# message - str - text for closing comment
+
+- organization: mozilla
+  repository: gecko-dev
+  close: True
+  lock: True
+  message: Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+
+- organization: mozilla
+  repository: gecko-projects
+  close: True
+  lock: True
+  message: Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+
