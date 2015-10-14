@@ -14,33 +14,45 @@ DEFAULT_MESSAGE = 'Pull requests not accepted. Please see CONTRIBUTING.'
 DEFAULT_CONFIG = 'close_pull_requests.yaml'
 
 logger = logging.getLogger(__name__)
+exit_code = 0
+
+
+def update_exit_code(new_code):
+    global exit_code
+    if exit_code < new_code:
+        exit_code = new_code
 
 
 def close_prs(gh, organization=None, repository=None,
               message=None, lock=False, close=False):
     if message is None:
         message = DEFAULT_MESSAGE
-    for pr in gh.iter_repo_issues(organization, repository, state='open'):
-        if pr.pull_request:
-            if close:
-                pr.create_comment(message)
-                pr.close()
-                logger.info("Closed PR %s for %s/%s", pr.number, organization,
-                            repository)
-                if lock:
-                    print("Lock PR manually: https://github.com/%s/%s/pull/%s"
-                          % (organization, repository, pr.number))
+    try:
+        for pr in gh.iter_repo_issues(organization, repository, state='open'):
+            if pr.pull_request:
+                if close:
+                    pr.create_comment(message)
+                    pr.close()
+                    logger.info("Closed PR %s for %s/%s", pr.number,
+                                organization, repository)
+                    if lock:
+                        print("Lock PR manually: "
+                              "https://github.com/%s/%s/pull/%s" %
+                              (organization, repository, pr.number))
+                else:
+                    print("PR %s open for %s/%s at: "
+                          "https://github.com/%s/%s/pull/%s" % (pr.number,
+                                                                organization,
+                                                                repository,
+                                                                organization,
+                                                                repository,
+                                                                pr.number))
             else:
-                print("PR %s open for %s/%s at: "
-                      "https://github.com/%s/%s/pull/%s" % (pr.number,
-                                                            organization,
-                                                            repository,
-                                                            organization,
-                                                            repository,
-                                                            pr.number))
-        else:
-            logger.debug("Skipping issue %s for %s/%s", pr.number, organization,
-                         repository)
+                logger.debug("Skipping issue %s for %s/%s", pr.number,
+                             organization, repository)
+    except AttributeError:
+        logger.error("No access to repository %s/%s", organization, repository)
+        update_exit_code(1)
 
 
 def close_configured_prs(gh, config_file):
@@ -77,10 +89,10 @@ def main():
                   lock=args.lock, message=args.message)
     else:
         close_configured_prs(gh, args.config)
-    return 0
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     logging.getLogger('github3').setLevel(logging.WARNING)
-    raise SystemExit(main())
+    main()
+    raise SystemExit(exit_code)
