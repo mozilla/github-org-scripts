@@ -5,9 +5,10 @@
     Provide a closing comment, and print the lock URL if desired
 """
 
-import logging
 import argparse
+import logging
 import yaml
+
 from client import get_github3_client
 
 DEFAULT_MESSAGE = 'Pull requests not accepted. Please see CONTRIBUTING.'
@@ -18,6 +19,11 @@ exit_code = 0
 
 
 def update_exit_code(new_code):
+    """ Update global exit_code, following rules.
+
+        Current rule is only update if the new value signifies a
+        "more severe" error (higher integer value)
+    """
     global exit_code
     if exit_code < new_code:
         exit_code = new_code
