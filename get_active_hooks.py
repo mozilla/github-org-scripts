@@ -57,7 +57,7 @@ def report_hooks(gh, org, active_only, unique_only, do_ping):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("org", help='Organization', default='mozilla',
+    parser.add_argument("org", help='Organization', default=['mozilla'],
                         nargs='*')
     parser.add_argument("--active", help="Show active hooks only",
                         action='store_true')
