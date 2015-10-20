@@ -1,27 +1,39 @@
 #!/usr/bin/env python
 """
     Report on Service & Web hooks for organization.
-
-    To do:
-        * add csv output
 """
-
 import argparse
 import client
 import logging
 import urlparse
+import yaml
+
+"""
+    Lore:   swapping hook.test for hook.ping will cause repetition of the
+            actions.  In particular, a number of repos post to IRC channels
+            and/or bugs on commits, so expect comments to that effect.
+"""
 
 logger = logging.getLogger(__name__)
 
 
-def report_hooks(gh, org, active_only, unique_only, do_ping):
+def report_hooks(gh, org, active_only, unique_only, do_ping, yaml_out):
     org_handle = gh.organization(org)
+    org_struct = org_handle.to_json()
+    repo_list = []
+    org_struct['repo_list'] = repo_list
     unique_hooks = set()
     msg = "Active" if active_only else "All"
     for repo in org_handle.iter_repos():
+        repo_struct = repo.to_json()
+        hook_list = []
+        repo_struct['hook_list'] = hook_list
+        repo_list.append(repo_struct)
         repo_hooks = set()
         ping_attempts = ping_fails = 0
         for hook in repo.iter_hooks():
+            hook_struct = hook.to_json()
+            hook_list.append(hook_struct)
             # if hook.name == "web", then this is a web hook, and there can be
             # several per repo. The unique part is the hook.config['url'], which
             # may contain sensitive info (including basic login data), so just
@@ -41,7 +53,6 @@ def report_hooks(gh, org, active_only, unique_only, do_ping):
                 if not hook.ping():
                     ping_fails += 1
                     logger.warning('Ping failed for %s', name)
-
         if repo_hooks and not unique_only:
             print("%s hooks for %s, pinged %d (%d failed)" % (msg, repo.name,
                                                               ping_attempts,
@@ -49,7 +60,9 @@ def report_hooks(gh, org, active_only, unique_only, do_ping):
             for h in repo_hooks:
                 print(h)
         unique_hooks = unique_hooks.union(repo_hooks)
-    if not unique_only and unique_hooks:
+    if yaml_out:
+        print(yaml.safe_dump([org_struct, ]))
+    elif unique_only and unique_hooks:
         print("%s hooks for org %s" % (msg, org))
         for h in unique_hooks:
             print(h)
@@ -61,9 +74,10 @@ def parse_args():
                         nargs='*')
     parser.add_argument("--active", help="Show active hooks only",
                         action='store_true')
-    parser.add_argument("--unique", help="Show hook names only",
+    parser.add_argument("--unique", help="Show unique hook names only",
                         action='store_true')
     parser.add_argument("--ping", help="Ping all hooks", action="store_true")
+    parser.add_argument("--yaml", help="Yaml ouput only", action="store_true")
     return parser.parse_args()
 
 
@@ -71,7 +85,7 @@ def main():
     args = parse_args()
     gh = client.get_github3_client()
     for org in args.org:
-        report_hooks(gh, org, args.active, args.unique, args.ping)
+        report_hooks(gh, org, args.active, args.unique, args.ping, args.yaml)
 
 
 if __name__ == '__main__':
