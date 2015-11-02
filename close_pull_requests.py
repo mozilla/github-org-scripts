@@ -11,7 +11,8 @@ import yaml
 
 from client import get_github3_client
 
-DEFAULT_MESSAGE = 'Pull requests not accepted. Please see CONTRIBUTING.'
+DEFAULT_MESSAGE = 'We do not use Pull Requests on this repo. Please see ' \
+                  'CONTRIBUTING or ReadMe file.'
 DEFAULT_CONFIG = 'close_pull_requests.yaml'
 
 logger = logging.getLogger(__name__)
