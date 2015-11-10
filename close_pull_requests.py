@@ -62,11 +62,14 @@ def close_prs(gh, organization=None, repository=None,
         update_exit_code(1)
 
 
-def close_configured_prs(gh, config_file):
+def close_configured_prs(gh, config_file, dry_run=False):
     config = []
     with open(config_file, 'rb') as yaml_file:
         config = yaml.safe_load(yaml_file)
     for repository in config:
+        if dry_run:
+            repository['lock'] = False
+            repository['close'] = False
         close_prs(gh, **repository)
 
 
@@ -81,6 +84,8 @@ def parse_args():
                         action='store_true')
     parser.add_argument('--config', help="read configs for projects (default "
                         "'%s')" % DEFAULT_CONFIG, default=DEFAULT_CONFIG)
+    parser.add_argument('--dry-run', action='store_true',
+                        help='Just show, regardless of config')
     return parser.parse_args()
 
 
@@ -95,7 +100,7 @@ def main():
         close_prs(gh, organization=org, repository=repo, close=args.close,
                   lock=args.lock, message=args.message)
     else:
-        close_configured_prs(gh, args.config)
+        close_configured_prs(gh, args.config, args.dry_run)
 
 
 if __name__ == '__main__':
