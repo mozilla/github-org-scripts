@@ -21,3 +21,9 @@
   lock: True
   message: Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
 
+- organization: mozilla
+  repository: webtools-bmo-bugzilla
+  lock: False
+  close: True
+  message: Please do not file PRs here, see https://wiki.mozilla.org/BMO/Submitting_Patches
+
