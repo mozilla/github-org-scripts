@@ -9,6 +9,12 @@ from client import get_token
 
 logger = logging.getLogger(__name__)
 
+def get_user_email(user_login, headers):
+    user_url = 'https://api.github.com/users/%s' % user_login
+    resp = requests.get(user_url, headers=headers)
+    user_info = resp.json()
+    email = user_info.get('email', '') or "no public email address"
+    return email
 
 def check_admins(org):
     headers = {
@@ -35,7 +41,7 @@ def check_admins(org):
     if real_admins:
         print 'The following admins DO NOT HAVE 2FA for org %s:' % org
         for a in real_admins:
-            print a['login']
+            print a['login'], get_user_email(a['login'], headers)
     else:
         print 'Congrats! All admins have 2FA enabled in %s!' % org
 
