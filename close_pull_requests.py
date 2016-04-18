@@ -35,8 +35,11 @@ def close_prs(gh, organization=None, repository=None,
     if message is None:
         message = DEFAULT_MESSAGE
     try:
-        for pr in gh.iter_repo_issues(organization, repository, state='open'):
+        repo = gh.repository(organization, repository)
+        for pr in repo.issues(state='open'):
             if pr.pull_request:
+                logger.debug("Examining PR %s for %s/%s", pr.number,
+                             organization, repository)
                 if close:
                     pr.create_comment(message)
                     pr.close()
@@ -105,6 +108,6 @@ def main():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-    logging.getLogger('github3').setLevel(logging.WARNING)
+    logging.getLogger('github3').setLevel(logging.ERROR)
     main()
     raise SystemExit(exit_code)
