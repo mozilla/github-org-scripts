@@ -6,8 +6,8 @@ These are some API helper scripts for sanely managing a github org. For now this
 ### contributing.py
 Analyze all the "sources" repositories (i.e., those that aren't forks) in a github org and list the repositories that do *NOT* have a CONTRIBUTING file.
 
-### admins.py
-Show all org admins *WITHOUT* [Two-Factor
+### missing_2fa.py
+Show all org members (or just admins)  *WITHOUT* [Two-Factor
 Auth](https://help.github.com/articles/about-two-factor-authentication/) enabled
 
 ### Audit logs
