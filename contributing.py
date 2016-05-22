@@ -2,6 +2,25 @@
 import sys
 
 from client import get_github3_client
+from github3.exceptions import UnprocessableResponseBody
+
+def get_files(repo, directory):
+    """ Get the files from this repo
+
+    The interface on this for github3.py version 1.0.0a4 is not yet
+    stable, so some coding-by-coincidence is used.
+    """
+    names = None
+    response = repo.file_contents(directory)
+    if isinstance(response, UnprocessableResponseBody):
+        # response.body contains json of the directory contents as a list of
+        # dictionaries. The calling code wants a dictionary with file
+        # names as keys.
+        names = dict(((x['name'], None) for x in response.body))
+    else:
+        raise Exception("github3.py behavior changed")
+    return names
+
 
 if __name__ == '__main__':
     gh = get_github3_client()
@@ -10,11 +29,11 @@ if __name__ == '__main__':
     good_repos = []
     bad_repos = []
 
-    repos = gh.organization('mozilla').iter_repos(type='sources')
+    repos = gh.organization('mozilla').repositories(type='sources')
     for repo in repos:
         # All files in this repo's default branch.
         # {'filename.md': Content(), 'filename2.txt': Contents(), ...}
-        files = repo.contents('/')
+        files = get_files(repo, '/')
 
         if files:
             contrib_files = [f for f in files.keys() if
