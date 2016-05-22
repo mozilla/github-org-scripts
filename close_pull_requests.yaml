@@ -13,17 +13,29 @@
   repository: gecko-dev
   close: True
   lock: True
-  message: Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+  message: (Automated Close) Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
 
 - organization: mozilla
   repository: gecko-projects
   close: True
   lock: True
-  message: Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+  message: (Automated Close) Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
 
 - organization: mozilla
   repository: webtools-bmo-bugzilla
   lock: False
   close: True
-  message: Please do not file PRs here, see https://wiki.mozilla.org/BMO/Submitting_Patches
+  message: (Automated Close) Please do not file PRs here, see https://wiki.mozilla.org/BMO/Submitting_Patches
+
+- organization: mozilla
+  repository: build-mozharness
+  message: (Automated Close) assuming PR created just for testing. File [bug](https://bugzilla.mozilla.org) to land.
+  lock: False
+  close: True
+
+- organization: mozilla
+  repository: build-tools
+  message: (Automated Close) assuming PR created just for testing. File [bug](https://bugzilla.mozilla.org) to land.
+  lock: False
+  close: True
 
