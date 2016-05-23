@@ -26,8 +26,7 @@ def update_exit_code(new_code):
         "more severe" error (higher integer value)
     """
     global exit_code
-    if exit_code < new_code:
-        exit_code = new_code
+    exit_code = max(exit_code, new_code)
 
 
 def close_prs(gh, organization=None, repository=None,
@@ -35,8 +34,12 @@ def close_prs(gh, organization=None, repository=None,
     if message is None:
         message = DEFAULT_MESSAGE
     try:
-        for pr in gh.iter_repo_issues(organization, repository, state='open'):
+        repo = gh.repository(organization, repository)
+        logger.debug("Checking for PRs in %s", repo.name)
+        for pr in repo.issues(state='open'):
             if pr.pull_request:
+                logger.debug("Examining PR %s for %s/%s", pr.number,
+                             organization, repository)
                 if close:
                     pr.create_comment(message)
                     pr.close()
@@ -57,6 +60,8 @@ def close_prs(gh, organization=None, repository=None,
             else:
                 logger.debug("Skipping issue %s for %s/%s", pr.number,
                              organization, repository)
+        else:
+            logger.debug("no open PR's in %s!", repo.name)
     except AttributeError:
         logger.error("No access to repository %s/%s", organization, repository)
         update_exit_code(1)
@@ -95,6 +100,8 @@ def main():
         logger.setLevel(logging.DEBUG)
         logging.getLogger('github3').setLevel(logging.DEBUG)
     gh = get_github3_client()
+    me = gh.me()
+    logger.debug("I'm %s (%s)", me.name, me.login)
     if args.only:
         org, repo = args.only.split('/')
         close_prs(gh, organization=org, repository=repo, close=args.close,
@@ -105,6 +112,6 @@ def main():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-    logging.getLogger('github3').setLevel(logging.WARNING)
+    logging.getLogger('github3').setLevel(logging.ERROR)
     main()
     raise SystemExit(exit_code)
