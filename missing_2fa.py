@@ -33,13 +33,13 @@ def update_team_membership(org, new_member_list):
     for login in to_remove:
         if not team.remove_member(login):
             logger.warn("Failed to remove a member"
-                    " - you need 'write:org' permissions")
+                    " - you need 'admin:org' permissions")
             break
     print "%5d new" % len(to_add)
     for login in to_add:
         if not team.add_member(login):
             logger.warn("Failed to add a member"
-                    " - you need 'write:org' permissions")
+                    " - you need 'admin:org' permissions")
             break
     print "%5d no change" % len(no_change)
 
