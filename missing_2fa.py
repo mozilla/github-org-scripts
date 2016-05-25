@@ -29,19 +29,27 @@ def update_team_membership(org, new_member_list):
     to_remove = current - new
     to_add = new - current
     no_change = new & current
+    update_success = True
     print "%5d alumni" % len(to_remove)
     for login in to_remove:
         if not team.remove_member(login):
             logger.warn("Failed to remove a member"
                     " - you need 'admin:org' permissions")
+            update_success = False
             break
     print "%5d new" % len(to_add)
     for login in to_add:
         if not team.add_member(login):
             logger.warn("Failed to add a member"
                     " - you need 'admin:org' permissions")
+            update_success = False
             break
     print "%5d no change" % len(no_change)
+    # if we're running in the ipython notebook, the log message isn't
+    # displayed. Output something useful
+    if not update_success:
+        print "Updates were not made to team '%s' in '%s'." % (BAD_TEAM, org.name)
+        print "Make sure your API token has 'admin:org' permissions for that organization."
 
 
 def check_users(gh, org_name, admins_only=True, update_team=False):
