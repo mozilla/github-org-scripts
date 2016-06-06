@@ -36,30 +36,26 @@ def close_prs(gh, organization=None, repository=None,
     try:
         repo = gh.repository(organization, repository)
         logger.debug("Checking for PRs in %s", repo.name)
-        for pr in repo.issues(state='open'):
-            if pr.pull_request:
-                logger.debug("Examining PR %s for %s/%s", pr.number,
-                             organization, repository)
-                if close:
-                    pr.create_comment(message)
-                    pr.close()
-                    logger.info("Closed PR %s for %s/%s", pr.number,
-                                organization, repository)
-                    if lock:
-                        print("Lock PR manually: "
-                              "https://github.com/%s/%s/pull/%s" %
-                              (organization, repository, pr.number))
-                else:
-                    print("PR %s open for %s/%s at: "
-                          "https://github.com/%s/%s/pull/%s" % (pr.number,
-                                                                organization,
-                                                                repository,
-                                                                organization,
-                                                                repository,
-                                                                pr.number))
+        for pr in repo.pull_requests(state='open'):
+            logger.debug("Examining PR %s for %s/%s", pr.number,
+                            organization, repository)
+            if close:
+                pr.create_comment(message)
+                pr.close()
+                logger.info("Closed PR %s for %s/%s", pr.number,
+                            organization, repository)
+                if lock:
+                    print("Lock PR manually: "
+                            "https://github.com/%s/%s/pull/%s" %
+                            (organization, repository, pr.number))
             else:
-                logger.debug("Skipping issue %s for %s/%s", pr.number,
-                             organization, repository)
+                print("PR %s open for %s/%s at: "
+                        "https://github.com/%s/%s/pull/%s" % (pr.number,
+                                                            organization,
+                                                            repository,
+                                                            organization,
+                                                            repository,
+                                                            pr.number))
         else:
             logger.debug("no open PR's in %s!", repo.name)
     except AttributeError:
