@@ -39,6 +39,7 @@ def update_team_membership(org, new_member_list):
             break
     print "%5d new" % len(to_add)
     for login in to_add:
+        print("    {} is new".format(login))
         if not team.add_member(login):
             logger.warn("Failed to add a member"
                     " - you need 'admin:org' permissions")
