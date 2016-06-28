@@ -21,7 +21,11 @@ UPDATE_GITHUB = False
 ISSUE_COMMENT = (r'''To: @mozilla/{} - please enable 2fa for your github'''
 ''' account. Failure to do so will result in removal from the org.
 '''
-'''Follow the link in the email to the original issue for more information.'''
+'''See [this
+issue](https://github.com/mozilla/admin_for_mozilla_private/issues/1)
+and [these
+instructions](https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/)
+for additional information.'''
 )
 ISSUE_OBJECT = None
 
