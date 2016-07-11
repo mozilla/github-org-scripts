@@ -45,8 +45,12 @@ def get_communication_issue(team):
     global ISSUE_OBJECT
     if ISSUE_OBJECT is None:
         team.refresh()
-        assert team.repos_count == 1
-        repo = [x for x in team.repositories()][0]
+        # forks of the private repo still belong to the team, so make
+        # sure we're working with the one we intend.
+        repos = [x for x in team.repositories()
+                if x.full_name == u'mozilla/admin_for_mozilla_private']
+        assert len(repos) == 1
+        repo = repos[0]
         ISSUE_OBJECT = repo.issue(1) # magic number
     return ISSUE_OBJECT
 
