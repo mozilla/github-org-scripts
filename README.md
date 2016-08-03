@@ -30,6 +30,10 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 ### old_repos.py
 Generate a list of empty (should be deleted) repositories as well as untoched repos (might need to be archived).
 
+### repos_without_teams
+
+List all repositories that do not belong to a team. Use -h for more info.
+
 ## Auth
 The API calls need you to authenticate. Generate a "personal access token" on the github settings page, then create a file ``.credentials`` like this:
 
@@ -39,4 +43,4 @@ The API calls need you to authenticate. Generate a "personal access token" on th
 where the first line is your github username and the second line is the token you generated.
 
 ## License
-This code is free software and licensed under an MIT license. &copy; 2015 Fred Wenzel <fwenzel@mozilla.com>. For more information read the file ``LICENSE``.
+This code is free software and licensed under an MIT license. &copy; 2015 Fred Wenzel <fwenzel@mozilla.com>. For more information read the file ``LICENSE``. Unless otherwise noted.
