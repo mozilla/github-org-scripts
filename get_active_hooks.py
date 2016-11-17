@@ -19,20 +19,20 @@ logger = logging.getLogger(__name__)
 
 def report_hooks(gh, org, active_only, unique_only, do_ping, yaml_out):
     org_handle = gh.organization(org)
-    org_struct = org_handle.to_json()
+    org_struct = org_handle.as_dict()
     repo_list = []
     org_struct['repo_list'] = repo_list
     unique_hooks = set()
     msg = "Active" if active_only else "All"
-    for repo in org_handle.iter_repos():
-        repo_struct = repo.to_json()
+    for repo in org_handle.repositories():
+        repo_struct = repo.as_dict()
         hook_list = []
         repo_struct['hook_list'] = hook_list
         repo_list.append(repo_struct)
         repo_hooks = set()
         ping_attempts = ping_fails = 0
-        for hook in repo.iter_hooks():
-            hook_struct = hook.to_json()
+        for hook in repo.hooks():
+            hook_struct = hook.as_dict()
             hook_list.append(hook_struct)
             # if hook.name == "web", then this is a web hook, and there can be
             # several per repo. The unique part is the hook.config['url'], which
