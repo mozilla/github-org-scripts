@@ -33,14 +33,19 @@ def wait_for_karma(gh, min_karma=25, msg=None):
 
 
 def get_hook_name(hook):
-    # if hook.name == "web", then this is a web hook, and there can be
-    # several per repo. The unique part is the hook.config['url'], which
+    # we might have a github3 object or a dictionary - convert to
+    # dictionary if not that
+    if not isinstance(hook, dict):
+        hook = hook.as_dict()
+
+    # if hook['name'] == "web", then this is a web hook, and there can be
+    # several per repo. The unique part is the hook['config']['url'], which
     # may contain sensitive info (including basic login data), so just
     # grab scheme, hostname, and port.
-    if hook.name != "web":
-        name = hook.name
+    if hook['name'] != "web":
+        name = hook['name']
     else:
-        url = hook.config['url']
+        url = hook['config']['url']
         parts = urlparse.urlparse(url)
         # port can be None, which prints funny, but is good enough for
         # identification.
@@ -58,29 +63,36 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
         unique_hooks = set()
         msg = "Active" if active_only else "All"
         for repo in org_handle.repositories():
-            if db.search(q.name == repo.name):
-                # already have data
-                logger.info("Already have data for {}".format(repo.name))
-                continue
-            wait_for_karma(gh, 100, msg="waiting at {}".format(repo.name))
-            repo_struct = repo.as_dict()
-            hook_list = []
-            repo_struct['hook_list'] = hook_list
-            repo_list.append(repo_struct)
             repo_hooks = set()
-            ping_attempts = ping_fails = 0
-            for hook in repo.hooks():
-                wait_for_karma(gh, 100, msg="waiting at hooks() for  {}".format(repo.name))
-                hook_struct = hook.as_dict()
-                hook_list.append(hook_struct)
-                name = get_hook_name(hook)
-                if hook.active or not active_only:
-                    repo_hooks.add(name)
-                if do_ping and hook.active:
-                    ping_attempts += 1
-                    if not hook.ping():
-                        ping_fails += 1
-                        logger.warning('Ping failed for %s', name)
+            # try for existing data
+            l = db.search(q.name == repo.name)
+            have_data = len(l) == 1
+            if have_data:
+                # already have data
+                logger.debug("Already have data for {}".format(repo.name))
+                # load existing data
+                repo_struct = l[0]
+                hook_list = repo_struct['hook_list']
+                repo_hooks = {get_hook_name(x) for x in hook_list}
+            else:
+                wait_for_karma(gh, 100, msg="waiting at {}".format(repo.name))
+                repo_struct = repo.as_dict()
+                hook_list = []
+                repo_struct['hook_list'] = hook_list
+                repo_list.append(repo_struct)
+                ping_attempts = ping_fails = 0
+                for hook in repo.hooks():
+                    wait_for_karma(gh, 100, msg="waiting at hooks() for  {}".format(repo.name))
+                    hook_struct = hook.as_dict()
+                    hook_list.append(hook_struct)
+                    name = get_hook_name(hook)
+                    if hook.active or not active_only:
+                        repo_hooks.add(name)
+                    if do_ping and hook.active:
+                        ping_attempts += 1
+                        if not hook.ping():
+                            ping_fails += 1
+                            logger.warning('Ping failed for %s', name)
             if repo_hooks and not unique_only:
                 print("%s hooks for %s:" % (msg, repo.name))
                 if do_ping:
@@ -90,7 +102,8 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
                     print("    {:s}".format(h))
             unique_hooks = unique_hooks.union(repo_hooks)
             # now that we're done with this repo, persist the data
-            db.insert(repo_struct)
+            if not have_data:
+                db.insert(repo_struct)
     if yaml_out:
         print(yaml.safe_dump([org_struct, ]))
     elif unique_only and unique_hooks:
