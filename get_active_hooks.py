@@ -2,6 +2,12 @@
 """
     Report on Service & Web hooks for organization.
 """
+_epilog = """
+To avoid issues with large organizations and API rate limits, the data
+for each organization is cached in a tinydb database named <org>.db.
+While new repositories will be automatically added, deletes & updates
+are not handled. Manually remove the database to force a full query.
+"""
 import argparse
 import client
 import logging
@@ -113,14 +119,15 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, epilog=_epilog)
     parser.add_argument("org", help='Organization', default=['mozilla'],
                         nargs='*')
-    parser.add_argument("--active", help="Show active hooks only",
-                        action='store_true')
+    parser.add_argument("--active", action='store_true',
+                        help="Show active hooks only (not for cached repositories)")
     parser.add_argument("--unique", help="Show unique hook names only",
                         action='store_true')
-    parser.add_argument("--ping", help="Ping all hooks", action="store_true")
+    parser.add_argument("--ping", action="store_true",
+                        help="Ping all hooks (not for cached repositories)")
     parser.add_argument("--yaml", help="Yaml ouput only", action="store_true")
     return parser.parse_args()
 
