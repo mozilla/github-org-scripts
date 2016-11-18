@@ -10,6 +10,9 @@ Analyze all the "sources" repositories (i.e., those that aren't forks) in a gith
 Inform out-of-compliance members of the 2FA requirement, and give them a
 brief time to correct it before having membership revoked.
 
+### get_active_hooks.py
+Find all hooks configured for an organization -- see --help for details
+
 ### missing_2fa.py
 Show all org members (or just admins)  *WITHOUT* [Two-Factor
 Auth](https://help.github.com/articles/about-two-factor-authentication/) enabled
