@@ -6,10 +6,6 @@ These are some API helper scripts for sanely managing a github org. For now this
 ### contributing.py
 Analyze all the "sources" repositories (i.e., those that aren't forks) in a github org and list the repositories that do *NOT* have a CONTRIBUTING file.
 
-### enforce_2fa.py
-Inform out-of-compliance members of the 2FA requirement, and give them a
-brief time to correct it before having membership revoked.
-
 ### get_active_hooks.py
 Find all hooks configured for an organization -- see --help for details
 
