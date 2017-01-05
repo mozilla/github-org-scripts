@@ -3,6 +3,7 @@
     Check for pending org invitations
 
 """
+from __future__ import print_function
 import argparse
 import logging
 import arrow
@@ -31,11 +32,18 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
     cutoff_time = get_cutoff_time(cutoff_delta)
     for invite in org.invitations():
         extended_at = arrow.get(invite['created_at'])
+        line_end = ": " if cancel else "\n"
         if extended_at < cutoff_time:
             invite['ago'] = extended_at.humanize()
-            print('Cancel {login} ({email}) extended {ago}'.format(**invite))
+            print('{login} ({email}) was invited {ago}'.format(**invite),
+                    end=line_end)
             if cancel:
-                org.remove_member(username=invite['login'])
+                success = org.remove_member(username=invite['login'])
+                if success:
+                    print("Cancelled")
+                else:
+                    print("FAILED to cancel")
+                    logger.warning("Couldn't cancel invite for {login} from {created_at}".format(**invite))
 
 
 def parse_args():
