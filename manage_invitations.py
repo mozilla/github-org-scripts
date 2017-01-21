@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 """
-    Check for pending org invitations
-
+    Report and manage pending org invitations
 """
 from __future__ import print_function
+
+# additional help text
+_epilog = """
+This script uses a preview API, so may cease to function without
+warning.
+
+The output always has the GitHub login as first field, so you can get
+those with:
+    manage_invitations | cut -d ' ' -f1
+"""
 import argparse
 import logging
 import arrow
@@ -35,10 +44,10 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
         line_end = ": " if cancel else "\n"
         if extended_at < cutoff_time:
             invite['ago'] = extended_at.humanize()
-            print('{login} ({email}) was invited {ago}'.format(**invite),
+            print('{login} ({email}) was invited {ago} by {inviter[login]}'.format(**invite),
                     end=line_end)
             if cancel:
-                success = org.remove_member(username=invite['login'])
+                success = org.remove_membership(username=invite['login'])
                 if success:
                     print("Cancelled")
                 else:
@@ -47,11 +56,11 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, epilog=_epilog)
     parser.add_argument('--cancel', action='store_true',
                         help='Cancel stale invitations')
     parser.add_argument('--cutoff', help='When invitations go stale '
-                        '(default "weeks=-2")',
+                        '(arrow replace syntax; default "weeks=-2")',
                         default="weeks=-2")
     parser.add_argument("orgs", nargs='*', default=['mozilla', ],
                         help='github organizations to check (defaults to mozilla)')
