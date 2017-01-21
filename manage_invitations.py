@@ -12,6 +12,8 @@ warning.
 The output always has the GitHub login as first field, so you can get
 those with:
     manage_invitations | cut -d ' ' -f1
+Or invitee & inviter:
+    manage_invitations | awk '!/^Proc/ {print $1 " by " $NF;}'
 """
 import argparse
 import logging
