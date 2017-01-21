@@ -23,9 +23,10 @@ from client import get_github3_client
 # hack until invitations are supported upstream
 import github3
 if not hasattr(github3.orgs.Organization, 'invitations'):
-    raise NotImplementedError, ("Your version of github3.py does not support invitations. "
-                                "Try https://github.com/hwine/github3.py/tree/invitations")
-    
+    raise NotImplementedError("Your version of github3.py does not support "
+                              "invitations. Try "
+                              "https://github.com/hwine/github3.py/tree/invitations")
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +48,15 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
         if extended_at < cutoff_time:
             invite['ago'] = extended_at.humanize()
             print('{login} ({email}) was invited {ago} by {inviter[login]}'.format(**invite),
-                    end=line_end)
+                  end=line_end)
             if cancel:
                 success = org.remove_membership(username=invite['login'])
                 if success:
                     print("Cancelled")
                 else:
                     print("FAILED to cancel")
-                    logger.warning("Couldn't cancel invite for {login} from {created_at}".format(**invite))
+                    logger.warning("Couldn't cancel invite for {login} "
+                                   "from {created_at}".format(**invite))
 
 
 def parse_args():
