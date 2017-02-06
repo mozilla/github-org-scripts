@@ -6,16 +6,20 @@
 """
 import argparse
 import logging
+import sys
 
 from client import get_github3_client
 
+
 BAD_TEAM = '2fa_disabled'
 logger = logging.getLogger(__name__)
+
 
 def get_user_email(gh, user_login):
     user_info = gh.user(user_login)
     email = user_info.email or "no public email address"
     return email
+
 
 def update_team_membership(org, new_member_list):
     # assume we're using a team to communicate with these folks, update
@@ -56,6 +60,9 @@ def update_team_membership(org, new_member_list):
 def check_users(gh, org_name, admins_only=True, update_team=False):
 
     org = gh.organization(org_name)
+    if not org:
+        print('No such org found!')
+        sys.exit(1)
 
     role = 'admin' if admins_only else 'all'
     user_type = 'admins' if admins_only else 'members'
@@ -76,13 +83,14 @@ def check_users(gh, org_name, admins_only=True, update_team=False):
     if update_team:
         update_team_membership(org, bad_member)
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--admins', action='store_true',
                         help='Report only for admins (default all members)')
     parser.add_argument("orgs", nargs='*', default=['mozilla', ],
                         help='github organizations to check (defaults to mozilla)')
-    parser.add_argument("--update-team", action='store_true', 
+    parser.add_argument("--update-team", action='store_true',
                         help='update membership of team "%s"' % BAD_TEAM)
     return parser.parse_args()
 
