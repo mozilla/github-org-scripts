@@ -11,3 +11,4 @@ git+https://github.com/mozilla/github_selenium#egg=github_selenium
 arrow==0.10.0
 # until up on pypa
 git+https://github.com/mozilla/github_selenium#egg=github_selenium
+arrow==0.10.0
