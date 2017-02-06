@@ -15,17 +15,19 @@ those with:
 Or invitee & inviter:
     manage_invitations | awk '!/^Proc/ {print $1 " by " $NF;}'
 """
-import argparse
-import logging
-import arrow
+# hwine believes keeping the doc above together is more important than PEP-8
+import argparse  # NOQA
+import logging  # NOQA
+import arrow  # NOQA
 
-from client import get_github3_client
+from client import get_github3_client  # NOQA
 # hack until invitations are supported upstream
-import github3
+import github3  # NOQA
+from github3.exceptions import ForbiddenError  # NOQA
 if not hasattr(github3.orgs.Organization, 'invitations'):
     raise NotImplementedError("Your version of github3.py does not support "
                               "invitations. Try "
-                              "https://github.com/hwine/github3.py/tree/invitations")
+                              "https://github.com/hwine/github3.py/tree/invitations")  # NOQA
 
 
 logger = logging.getLogger(__name__)
@@ -41,22 +43,29 @@ def get_cutoff_time(cutoff_delta):
 def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
 
     org = gh.organization(org_name)
+    if not org:
+        logger.error("No such org '%s'", org_name)
+        return
     cutoff_time = get_cutoff_time(cutoff_delta)
-    for invite in org.invitations():
-        extended_at = arrow.get(invite['created_at'])
-        line_end = ": " if cancel else "\n"
-        if extended_at < cutoff_time:
-            invite['ago'] = extended_at.humanize()
-            print('{login} ({email}) was invited {ago} by {inviter[login]}'.format(**invite),
-                  end=line_end)
-            if cancel:
-                success = org.remove_membership(username=invite['login'])
-                if success:
-                    print("Cancelled")
-                else:
-                    print("FAILED to cancel")
-                    logger.warning("Couldn't cancel invite for {login} "
-                                   "from {created_at}".format(**invite))
+    try:
+        for invite in org.invitations():
+            extended_at = arrow.get(invite['created_at'])
+            line_end = ": " if cancel else "\n"
+            if extended_at < cutoff_time:
+                invite['ago'] = extended_at.humanize()
+                print('{login} ({email}) was invited {ago} by '
+                      '{inviter[login]}'.format(**invite),
+                      end=line_end)
+                if cancel:
+                    success = org.remove_membership(username=invite['login'])
+                    if success:
+                        print("Cancelled")
+                    else:
+                        print("FAILED to cancel")
+                        logger.warning("Couldn't cancel invite for {login} "
+                                       "from {created_at}".format(**invite))
+    except ForbiddenError:
+        logger.error("You don't have permissions for org '%s'", org_name)
 
 
 def parse_args():
@@ -67,7 +76,8 @@ def parse_args():
                         '(arrow replace syntax; default "weeks=-2")',
                         default="weeks=-2")
     parser.add_argument("orgs", nargs='*', default=['mozilla', ],
-                        help='github organizations to check (defaults to mozilla)')
+                        help='github organizations to check (defaults to '
+                             'mozilla)')
     # make sure arrow is happy with the cutoff syntax
     args = parser.parse_args()
     try:
