@@ -65,7 +65,8 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
                         logger.warning("Couldn't cancel invite for {login} "
                                        "from {created_at}".format(**invite))
     except ForbiddenError:
-        logger.error("You don't have permissions for org '%s'", org_name)
+        logger.error("You don't have 'admin:org' permissions for org '%s'",
+                     org_name)
 
 
 def parse_args():
