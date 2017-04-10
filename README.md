@@ -1,5 +1,9 @@
 # github org helper scripts
 
+**NOTE: branch 'invitations' requires a version of github3.py which has
+not yet been released.** See
+[PR](https://github.com/sigmavirus24/github3.py/pull/675) for details.
+
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 
 ## Scripts
