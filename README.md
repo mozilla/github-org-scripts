@@ -9,9 +9,9 @@ Analyze all the "sources" repositories (i.e., those that aren't forks) in a gith
 ### get_active_hooks.py
 Find all hooks configured for an organization -- see --help for details
 
-### missing_2fa.py
-Show all org members (or just admins)  *WITHOUT* [Two-Factor
-Auth](https://help.github.com/articles/about-two-factor-authentication/) enabled
+### team_update.py
+Update administrative teams so they can be used for the new GitHub discussion
+feature. Use the ``--help`` option for more information.
 
 ### Audit logs
 Sadly, the org audit log does not have an API, so we'll screen scrape a little.
