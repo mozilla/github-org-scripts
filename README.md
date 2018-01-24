@@ -18,6 +18,9 @@ Analyze all the "sources" repositories (i.e., those that aren't forks) in a gith
 ### get_active_hooks.py
 Find all hooks configured for an organization -- see --help for details
 
+### get_org_info.py
+Output basic info about an org, more if you have permissions. See --help for details
+
 ### team_update.py
 Update administrative teams so they can be used for the new GitHub discussion
 feature. Use the ``--help`` option for more information.
