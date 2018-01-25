@@ -12,6 +12,7 @@ identifiers and contact info.
 # hwine believes keeping the doc above together is more important than PEP-8
 import argparse  # NOQA
 import logging  # NOQA
+from collections import defaultdict  # NOQA
 
 from client import get_github3_client  # NOQA
 
@@ -19,10 +20,12 @@ logger = logging.getLogger(__name__)
 DEBUG = False
 
 
-def get_info(gh, org):
+def show_info(gh, org):
+    def miss():
+        return "<hidden>"
     try:
         org = gh.organization(org)
-        orgd = org.as_dict()
+        orgd = defaultdict(miss, org.as_dict())
         print("{:>15}: {!s}".format("Name", org.name))
         print("{:>15}: {!s}".format("API v3 id", org.id))
         print("{:>15}: {!s}".format("API v4 id", orgd['type'] + str(org.id)))
@@ -30,8 +33,12 @@ def get_info(gh, org):
         print("{:>15}: {!s}".format("billing", orgd['billing_email']))
         print("{:>15}: {!s}".format("private repos",
                                     orgd['owned_private_repos']))
-        print("{:>15}: {!s}".format("plan", orgd['plan']['name']))
-        print("{:>15}: {!s}".format("seats", orgd['plan']['filled_seats']))
+        # Nested dictionaries need special handling
+        plan = orgd['plan']
+        if not isinstance(plan, dict):
+            plan = defaultdict(miss)
+        print("{:>15}: {!s}".format("plan", plan['name']))
+        print("{:>15}: {!s}".format("seats", plan['filled_seats']))
     except Exception:
         logger.error("Error obtaining data for org '%s'", str(org))
     finally:
@@ -61,7 +68,7 @@ def main():
         for org in args.orgs:
             if len(args.orgs) > 1:
                 print("Processing org {}".format(org))
-            get_info(gh, org)
+            show_info(gh, org)
 
 
 if __name__ == '__main__':
