@@ -13,6 +13,11 @@ Find all hooks configured for an organization -- see --help for details
 Update administrative teams so they can be used for the new GitHub discussion
 feature. Use the ``--help`` option for more information.
 
+### lfs.py
+Get current LFS Billing values using a headless firefox via selenium
+(``geckodriver`` must be installed). Credentials as environment
+variables, and 2FA token passed as input.
+
 ### Audit logs
 Sadly, the org audit log does not have an API, so we'll screen scrape a little.
 
