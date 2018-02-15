@@ -1,4 +1,5 @@
 github3.py==1.0.0a4
+jsonstreams==0.4.1
 PyYaml==3.11
 tinydb==3.2.1
 # until up on pypa
