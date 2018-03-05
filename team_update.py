@@ -18,11 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 def team_name(user_type):
-    team_name = TEAM + user_type
+    global TEAM
+    team_name = TEAM
+    if team_name[-1] in "-_":
+        team_name = TEAM + user_type
     return team_name
 
 
-def update_team_membership(org, new_member_list, team_name=None):
+def update_team_membership(org, new_member_list, team_name=None, do_update=False):
     # we're using a team to communicate with these folks, update
     # that team to contain exactly new_member_list members
     # team must already exist in the org
@@ -37,7 +40,7 @@ def update_team_membership(org, new_member_list, team_name=None):
     update_success = True
     print "%5d alumni" % len(to_remove)
     for login in to_remove:
-        if not team.remove_member(login):
+        if do_update and not team.remove_member(login):
             logger.warn("Failed to remove a member"
                     " - you need 'admin:org' permissions")
             update_success = False
@@ -48,7 +51,7 @@ def update_team_membership(org, new_member_list, team_name=None):
     for login in to_add:
         if VERBOSE:
             print("    {} is new".format(login))
-        if not team.add_member(login):
+        if do_update and not team.add_member(login):
             logger.warn("Failed to add a member"
                     " - you need 'admin:org' permissions")
             update_success = False
@@ -77,8 +80,8 @@ def check_users(gh, org_name, admins_only=True, update_team=False):
                 (len(members), user_type, org_name))
     else:
         print("Error: no %s found for %s" % (user_type, org_name))
-    if update_team:
-        update_team_membership(org, members, team_name(user_type))
+    if update_team or VERBOSE:
+        update_team_membership(org, members, team_name(user_type), update_team)
 
 
 def parse_args():
@@ -87,8 +90,10 @@ def parse_args():
                         help='Report only for org owners (default all members)')
     parser.add_argument("orgs", nargs='*', default=['mozilla', ],
                         help='github organizations to check (defaults to mozilla)')
-    parser.add_argument("--update-team", action='store_true',
+    parser.add_argument("--team", default=TEAM,
                         help='update membership of team "%s{owners,members}"' % TEAM)
+    parser.add_argument("--update-team", action='store_true',
+                        help='apply changes to GitHub')
     parser.add_argument("--verbose", action='store_true',
                         help='print logins for all changes')
     return parser.parse_args()
@@ -98,6 +103,8 @@ def main():
     args = parse_args()
     global VERBOSE
     VERBOSE = args.verbose
+    global TEAM
+    TEAM = args.team
     if args.orgs:
         gh = get_github3_client()
         for org in args.orgs:
