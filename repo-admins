@@ -1,0 +1,114 @@
+#!/usr/bin/env python
+"""
+    Report on the non-owner admins of the specified repo
+"""
+import argparse
+import logging
+from functools import lru_cache
+
+from client import get_github3_client
+
+
+VERBOSE = False
+logger = logging.getLogger(__name__)
+
+
+def unpack_repo(owner_repo, default=None):
+    """
+    unpack a repostitory specification, which might have the owner login in
+    prepended
+
+    >>> unpack_repo('user/repo')
+    ('user', 'repo')
+    >>> unpack_repo('user/repo', 'someone_else')
+    ('user', 'repo')
+    >>> unpack_repo('repo', 'owner')
+    ('owner', 'repo')
+    """
+
+
+    parts = owner_repo.split("/", 1)
+    if len(parts) is 2:
+        owner, repo = parts
+    else:
+        owner, repo = default, parts[0]
+    return owner, repo
+
+
+# singleton
+static_gh = None
+def gh():
+    global static_gh
+    if not static_gh:
+        static_gh = get_github3_client()
+    return static_gh
+
+
+def parse_args(args=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("repos", nargs='+',
+                        help='Repositories to check. Can be owner/repo or'
+                        ' repo')
+    parser.add_argument("--org", default='mozilla',
+                        help='Org to use for unqualified repos. Default'
+                        ' mozilla')
+    parser.add_argument("--verbose", action='store_true',
+                        help='print logins for all changes')
+    parser.add_argument('--debug', help="include github3 output",
+                        action='store_true')
+    args = parser.parse_args(args)
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        logging.getLogger('github3').setLevel(logging.DEBUG)
+    global VERBOSE
+    VERBOSE = args.verbose
+    return args
+
+
+@lru_cache(16)
+def fetch_owners(login):
+    """
+    get all org owners
+    """
+    owners = set()
+    org = gh().organization(login)
+    for user in org.members(role='admin'):
+        owners.add(user.login)
+    return owners
+
+
+def fetch_admins(owner, repo):
+    """
+    get all repository admins
+    """
+    admins = set()
+    repo = gh().repository(owner, repo)
+    for collaborator in repo.collaborators():
+        if collaborator.permissions['admin']:
+            admins.add(collaborator.login)
+    return admins
+
+
+def process_repo(owner, repo):
+    """
+    Find all repo admins, who are not organization owners
+    """
+    owners = fetch_owners(owner)
+    admins = fetch_admins(owner, repo)
+    return admins - owners
+
+
+def main(args=None):
+    args = parse_args(args=args)
+    for repo in args.repos:
+        owner_name, repo_name = unpack_repo(repo, default=args.org)
+        admins = process_repo(owner_name, repo_name)
+        print("{}/{}:".format(owner_name, repo_name))
+        for u in admins:
+            print(u)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
+    logging.getLogger('github3').setLevel(logging.WARNING)
+    raise SystemExit(main())
