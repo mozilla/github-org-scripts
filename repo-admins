@@ -51,7 +51,6 @@ def unpack_repo(owner_repo, default=None):
 # singleton
 static_gh = None
 
-
 def gh():
     global static_gh
     if not static_gh:
