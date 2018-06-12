@@ -4,7 +4,14 @@
 """
 import argparse
 import logging
-from functools import lru_cache
+try:
+    from functools import lru_cache
+except ImportError:
+    # add a do nothing for py2
+    def lru_cache(param):
+        def identity(func):
+            return func
+        return identity
 
 from client import get_github3_client
 
@@ -26,7 +33,6 @@ def unpack_repo(owner_repo, default=None):
     ('owner', 'repo')
     """
 
-
     parts = owner_repo.split("/", 1)
     if len(parts) is 2:
         owner, repo = parts
@@ -37,6 +43,8 @@ def unpack_repo(owner_repo, default=None):
 
 # singleton
 static_gh = None
+
+
 def gh():
     global static_gh
     if not static_gh:
