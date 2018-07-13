@@ -3,6 +3,11 @@
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 
 ## Scripts
+### auditlog.py
+Download audit log for $ORG via headless firefox via selenium
+([``geckodriver``][gd_url] must be installed). Credentials as environment
+variables, and 2FA token passed as input when requested.
+
 ### contributing.py
 Analyze all the "sources" repositories (i.e., those that aren't forks) in a github org and list the repositories that do *NOT* have a CONTRIBUTING file.
 
@@ -43,4 +48,6 @@ The API calls need you to authenticate. Generate a "personal access token" on th
 where the first line is your github username and the second line is the token you generated.
 
 ## License
-This code is free software and licensed under an MIT license. &copy; 2015 Fred Wenzel <fwenzel@mozilla.com>. For more information read the file ``LICENSE``.
+This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2018 Fred Wenzel and others. For more information read the file ``LICENSE``.
+
+[gd_url]: https://github.com/mozilla/geckodriver/releases
