@@ -1,3 +1,7 @@
 *\.py[oc]
 \.credentials
 cache/*\.json
+# for poetry
+.venv
+# for jupyter notebooks
+.ipynb*
