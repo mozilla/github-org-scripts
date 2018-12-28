@@ -3,11 +3,6 @@ jsonstreams==0.4.1
 # https://github.com/sigmavirus24/github3.py/pull/675 landed
 # github3.py==1.0.0a4
 git+https://github.com/hwine/github3.py.git@invitations
-jsonstreams==0.4.1
-# we need a version of github3.py with 
-# https://github.com/sigmavirus24/github3.py/pull/675 landed
-# github3.py==1.0.0a4
-# git+https://github.com/hwine/github3.py.git@invitations
 PyYaml==3.11
 tinydb==3.2.1
 # until up on pypa
