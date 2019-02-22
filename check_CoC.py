@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """
     Check every repo for proper presence of a code_of_conduct file.abs
 
@@ -6,6 +7,8 @@
 
 """
 # TODO: add rate limiting
+# TODO: add action code to issue, so can be found later (instead of opening
+#       another)
 
 from __future__ import print_function
 
