@@ -26,6 +26,7 @@ import github3
 _epilog = """
 """
 
+APPROVED_ACCOUNT = "mozilla-github-standards"
 COC_FILENAME = "CODE_OF_CONDUCT.md"
 COC_CONTENTS_URL = "https://github.com/mozilla/repo-templates/raw/master/templates/CODE_OF_CONDUCT.md"
 COC_MASTER_URL = "https://www.mozilla.org/about/governance/policies/participation/"
@@ -59,8 +60,8 @@ As of January 1 2019, Mozilla requires that all GitHub projects include this [CO
 1. Required Text - All text under the headings *Community Participation Guidelines and How to Report*, are required, and should not be altered.
 2. Optional Text - The Project Specific Etiquette heading provides a space to speak more specifically about ways people can work effectively and inclusively together. Some examples of those can be found on the [Firefox Debugger](https://github.com/devtools-html/debugger.html/blob/master/CODE_OF_CONDUCT.md) project, and [Common Voice](https://github.com/mozilla/voice-web/blob/master/CODE_OF_CONDUCT.md). (The optional part is commented out in the [raw template file](https://raw.githubusercontent.com/mozilla/repo-templates/blob/master/templates/CODE_OF_CONDUCT.md), and will not be visible until you modify and uncomment that part.)
 
-If you have any questions about this file, or Code of Conduct policies and procedures, please reach out to Emma Irwin (eirwin *AT* mozilla *DOT* com).""",
-    ), mozilla-github-standards@mozilla.com
+If you have any questions about this file, or Code of Conduct policies and procedures, please reach out to Mozilla-GitHub-Standards+CoC@mozilla.com.""",
+    ),
     Action(
         "COC002", "Create PR for boilerplate CoC", "Add CODE_OF_CONDUCT.md file", ""
     ),
@@ -76,7 +77,7 @@ As of January 1 2019, Mozilla requires that all GitHub projects include this [CO
 1. Required Text - All text under the headings *Community Participation Guidelines and How to Report*, are required, and should not be altered.
 2. Optional Text - The Project Specific Etiquette heading provides a space to speak more specifically about ways people can work effectively and inclusively together. Some examples of those can be found on the [Firefox Debugger](https://github.com/devtools-html/debugger.html/blob/master/CODE_OF_CONDUCT.md) project, and [Common Voice](https://github.com/mozilla/voice-web/blob/master/CODE_OF_CONDUCT.md). (The optional part is commented out in the [raw template file](https://raw.githubusercontent.com/mozilla/repo-templates/blob/master/templates/CODE_OF_CONDUCT.md), and will not be visible until you modify and uncomment that part.)
 
-If you have any questions about this file, or Code of Conduct policies and procedures, please reach out to Emma Irwin (eirwin *AT* mozilla *DOT* com).""",
+If you have any questions about this file, or Code of Conduct policies and procedures, please reach out to Mozilla-GitHub-Standards+CoC@mozilla.com.""",
     ),
     Action("COC004", "Everything already correct", "", ""),
 ]
@@ -354,6 +355,13 @@ class GitHubSession:
         self.gh = get_github3_client()
         global gh
         gh = self.gh
+        my_login = gh.me().login
+        approved_login = my_login.lower() == APPROVED_ACCOUNT.lower()
+        if not approved_login:
+            logger.warning("Unapproved user {}, no changes allowed.".format(my_login))
+            # don't allow changes
+            if live:
+                raise SystemExit("Terminating update run. User unapproved")
         if live:
             # Cache the CoC file
             r = requests.get(COC_CONTENTS_URL)
