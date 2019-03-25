@@ -308,7 +308,7 @@ class RetryQueue:
         """
         add an action to retry on repo later
         """
-        retriable = Retriable(repo, action, max_retries, time.time())
+        retriable = Retriable(repo, action, max_retries, int(time.time()))
         cls._queue.append(retriable)
 
     @classmethod
