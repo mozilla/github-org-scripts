@@ -9,3 +9,4 @@ tinydb==3.2.1
 git+https://github.com/mozilla/github_selenium#egg=github_selenium
 arrow==0.10.0
 backports.functools_lru_cache
+backoff==1.8.0

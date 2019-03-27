@@ -11,6 +11,7 @@
 from __future__ import print_function
 
 import argparse
+import backoff
 import base64
 import binascii
 import collections
@@ -38,6 +39,7 @@ Add Mozilla Code of Conduct file
 
 Fixes #{}.
 """.strip()
+COC_NO_ISSUE = "n/a"
 
 logger = logging.getLogger(__name__)
 gh = None
@@ -165,21 +167,31 @@ class CoCRepo:
 
         return len(ignore_reasons) == 0
 
-    def _add_action(self, summary):
-        for a in actions:
-            if a.summary == summary:
-                self.actions.append(a)
+    def _find_action(self, summary):
+        for action in actions:
+            if action.summary == summary:
                 break
         else:
+            action = None
             logger.error("No action for %s", summary)
+        return action
+
+    def _add_action(self, summary):
+        action = self._find_action(summary)
+        if action:
+            self.actions.append(action)
         return summary
 
     def _open_issue(self, action):
         title = action.title
         body = action.body + "\n\n_(Message {})_".format(action.code)
-        issue = self.repo.create_issue(title, body)
-        self.issue_number = issue.number
-        extra_text = " #{} ({})".format(issue.number, issue.html_url)
+        try:
+            issue = self.repo.create_issue(title, body)
+            self.issue_number = issue.number
+            extra_text = " #{} ({})".format(issue.number, issue.html_url)
+        except github3.exceptions.ClientError as e:
+            extra_text = " WARNING: Could not open issue for {}".format(self.repo.full_name)
+            self.issue_number = COC_NO_ISSUE  # give open_pr something to work with
         return extra_text
 
     def _get_fork(self):
@@ -212,17 +224,24 @@ class CoCRepo:
             Add the CoC file to the repo.
         """
         # Keep the commit simple.
-        commit_message = COC_COMMIT_MESSAGE.format(self.issue_number) + "\n\n_(Message {})_".format(action.code)
+        commit_message = ""
+        if self.issue_number == COC_NO_ISSUE:
+            # we couldn't open an issue
+            commit_message += "\n\nSee PR for details"
+        else:
+            commit_message = COC_COMMIT_MESSAGE.format(self.issue_number)
+        commit_message += "\n\n_(Message {})_".format(action.code)
         success = False
         try:
             self.fork_repo.create_file(COC_FILENAME, commit_message, self.new_contents)
             success = True
         except github3.exceptions.UnprocessableEntity:
             logger.warning("Likely file already in %s", self.fork_repo.full_name)
-        except github3.exceptions.GitHubException:
+        except github3.exceptions.GitHubError:
             logger.warning("Likely fork hasn't completed for %s", self.fork_repo.full_name)
         return success
 
+    @backoff.on_exception(backoff.expo, exception=github3.exceptions.ServerError, max_tries=15)
     def _open_pr(self, action):
         # steps:
         #   Check for forked repo, fork if not
@@ -239,11 +258,18 @@ class CoCRepo:
         else:
             repo = self.repo
             repo.refresh()  # upgrade from short repository to get default branch
+            if self.issue_number == COC_NO_ISSUE:
+                # we couldn't open an issue, so put all the explanation
+                # in the PR
+                msg_action = self._find_action("Create missing CoC issue")
+                pr_text = msg_action.body + "\n\n_(Message {})_".format(action.code)
+            else:
+                pr_text = "Fixes #{}\n\n_(Message {})_".format(self.issue_number, action.code)
             pr = repo.create_pull("Add Mozilla Code of Conduct",
                     repo.default_branch or "master",
                     "{}:{}".format(self.fork_repo.owner,
                         self.fork_repo.default_branch or "master"),
-                        "Fixes #{}\n\n_(Message {})_".format(self.issue_number, action.code))
+                        pr_text)
             msg = " Created PR #{} ({})".format(pr.number, pr.html_url)
             
         return msg
