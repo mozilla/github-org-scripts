@@ -98,6 +98,7 @@ class CoCRepo:
         self.coc_text = ""
         self.fork_repo = None
         self.already_handled = False
+        self.issue_number = None
         self.plan = []
         self.actions = []
         self.ignore_reasons = []
@@ -155,14 +156,20 @@ class CoCRepo:
             ignore_reasons.append("Repo is a fork")
         if len(ignore_reasons) == 0:
             # check for already handled (no nagging yet)
-            # TODO: we should recheck if incorrect & close, or open PR
-            #       if missing and no open PR.
-            # NOTE: since pr linked to issue, close of issue closes PR
+            has_issue = has_pr = False
             my_login = gh.me().login
             for issue in self.repo.issues(state="open"):
                 if issue.user.login == my_login:
-                    ignore_reasons.append("Already has issue/pr opened")
+                    # remember the issue, so we don't open another
+                    self.issue_number = issue.number
+                    has_issue = True
                     break
+            for pr in self.repo.pull_requests(state="open"):
+                if pr.user.login == my_login:
+                    has_pr = True
+                    break
+            if has_issue and has_pr:
+                ignore_reasons.append("Already has issue & pr opened")
         self.ignore_reasons = ignore_reasons
 
         return len(ignore_reasons) == 0
@@ -185,13 +192,17 @@ class CoCRepo:
     def _open_issue(self, action):
         title = action.title
         body = action.body + "\n\n_(Message {})_".format(action.code)
-        try:
-            issue = self.repo.create_issue(title, body)
-            self.issue_number = issue.number
-            extra_text = " #{} ({})".format(issue.number, issue.html_url)
-        except github3.exceptions.ClientError as e:
-            extra_text = " WARNING: Could not open issue for {}".format(self.repo.full_name)
-            self.issue_number = COC_NO_ISSUE  # give open_pr something to work with
+        if self.issue_number:
+            issue = self.repo.issue(self.issue_number)
+            extra_text = " Already open #{} ({})".format(issue.number, issue.html_url)
+        else:
+            try:
+                issue = self.repo.create_issue(title, body)
+                self.issue_number = issue.number
+                extra_text = " #{} ({})".format(issue.number, issue.html_url)
+            except github3.exceptions.ClientError as e:
+                extra_text = " WARNING: Could not open issue for {}".format(self.repo.full_name)
+                self.issue_number = COC_NO_ISSUE  # give open_pr something to work with
         return extra_text
 
     def _get_fork(self):
@@ -238,10 +249,13 @@ class CoCRepo:
         except github3.exceptions.UnprocessableEntity:
             logger.warning("Likely file already in %s", self.fork_repo.full_name)
         except github3.exceptions.GitHubError:
-            logger.warning("Likely fork hasn't completed for %s", self.fork_repo.full_name)
+            logger.warning("Likely fork hasn't completed for %s (%s)",
+                    self.fork_repo.full_name, self.repo.full_name)
         return success
 
-    @backoff.on_exception(backoff.expo, exception=github3.exceptions.ServerError, max_tries=15)
+    @backoff.on_exception(backoff.expo,
+            exception=(github3.exceptions.ServerError,
+                github3.exceptions.UnprocessableEntity), max_tries=15)
     def _open_pr(self, action):
         # steps:
         #   Check for forked repo, fork if not
@@ -354,7 +368,12 @@ class RetryQueue:
             needs_retry = []
             for r in remaining:
                 now = time.time()
-                not_before = r["last_time"] + 5 * retry
+                try:
+                    not_before = r["last_time"] + 5 * retry
+                except TypeError:
+                    logger.error("Bad queue item: '%s' (type %s)",
+                            str(r), type(r))
+                    continue
                 if not_before > now:
                     nap_seconds = int(not_before - now) + 1
                     logger.info("waiting {} before retry".format(nap_seconds))
