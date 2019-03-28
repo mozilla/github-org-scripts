@@ -48,7 +48,7 @@ def indent(spaces=4, iterable=None):
     return [" " * spaces + x for x in iterable]
 
 
-# Each action has a unique messgage and description string. Tie them together
+# Each action has a unique messgage and summary string. Tie them together
 Action = collections.namedtuple("Action", "code summary title body")
 
 actions = [
@@ -247,7 +247,8 @@ class CoCRepo:
             self.fork_repo.create_file(COC_FILENAME, commit_message, self.new_contents)
             success = True
         except github3.exceptions.UnprocessableEntity:
-            logger.warning("Likely file already in %s", self.fork_repo.full_name)
+            logger.warning("Likely file already in %s (%s)",
+                    self.fork_repo.full_name, self.repo.full_name)
         except github3.exceptions.GitHubError:
             logger.warning("Likely fork hasn't completed for %s (%s)",
                     self.fork_repo.full_name, self.repo.full_name)
@@ -364,12 +365,13 @@ class RetryQueue:
         retry = 0
         while needs_retry:
             retry += 1
+            print("\nStarting retry pass {}".format(retry))
             remaining = needs_retry
             needs_retry = []
             for r in remaining:
                 now = time.time()
                 try:
-                    not_before = r["last_time"] + 5 * retry
+                    not_before = r.last_time + 5 * retry
                 except TypeError:
                     logger.error("Bad queue item: '%s' (type %s)",
                             str(r), type(r))
@@ -378,20 +380,20 @@ class RetryQueue:
                     nap_seconds = int(not_before - now) + 1
                     logger.info("waiting {} before retry".format(nap_seconds))
                     time.sleep(nap_seconds)
-                msg = repo._dispatch(r.action)
-                action = r.action.description
+                msg = r.repo._dispatch(r.action)
+                action = r.action.summary
                 full_name = r.repo.repo.full_name
                 number = r.repo.issue_number
                 if not repo.pr_success:
                     # still not ready
-                    if retry < r["max_retries"]:
+                    if retry < r.max_retries:
                         needs_retry.append(r)
                     else:
                         # put back on retry list, since not finished
                         needs_retry.append(r)
-                        logger.warning("Giving up on {} for issue {} in {}".format(action, nummber, full_name))
+                        logger.warning("Giving up on {} for issue {} in {}".format(action, number, full_name))
                 else:
-                    logger.info("Succeeded on {} for issue {} in {}".format(action, nummber, full_name))
+                    logger.info("Succeeded on {} for issue {} in {}".format(action, number, full_name))
 
 class GitHubSession:
     def __init__(self, live=True):
