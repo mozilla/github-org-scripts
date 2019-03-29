@@ -62,7 +62,7 @@ As of January 1 2019, Mozilla requires that all GitHub projects include this [CO
 1. Required Text - All text under the headings *Community Participation Guidelines and How to Report*, are required, and should not be altered.
 2. Optional Text - The Project Specific Etiquette heading provides a space to speak more specifically about ways people can work effectively and inclusively together. Some examples of those can be found on the [Firefox Debugger](https://github.com/devtools-html/debugger.html/blob/master/CODE_OF_CONDUCT.md) project, and [Common Voice](https://github.com/mozilla/voice-web/blob/master/CODE_OF_CONDUCT.md). (The optional part is commented out in the [raw template file](https://raw.githubusercontent.com/mozilla/repo-templates/blob/master/templates/CODE_OF_CONDUCT.md), and will not be visible until you modify and uncomment that part.)
 
-If you have any questions about this file, or Code of Conduct policies and procedures, please reach out to Mozilla-GitHub-Standards+CoC@mozilla.com.""",
+If you have any questions about this file, or Code of Conduct policies and procedures, please see [Mozilla-GitHub-Standards](https://wiki.mozilla.org/GitHub/Repository_Requirements) or email Mozilla-GitHub-Standards+CoC@mozilla.com.""",
     ),
     Action(
         "COC002", "Create PR for boilerplate CoC", "Add CODE_OF_CONDUCT.md file", ""
@@ -136,14 +136,15 @@ class CoCRepo:
         else:
             # search tree for case sensitive path of code of conduct.
             found = False
-            for hash in tree.tree:
-                if hash.type == "blob" and hash.path == COC_FILENAME:
-                    found = True
-                    # Cache contents of file while we can easily do so
-                    blob = self.repo.blob(hash.sha)
-                    text = blob.decoded
-                    self.coc_text = text
-                    break
+            if tree:  # sometimes it's None
+                for hash in tree.tree:
+                    if hash.type == "blob" and hash.path == COC_FILENAME:
+                        found = True
+                        # Cache contents of file while we can easily do so
+                        blob = self.repo.blob(hash.sha)
+                        text = blob.decoded
+                        self.coc_text = text
+                        break
         return found
 
     def _do_we_care(self):
@@ -246,12 +247,14 @@ class CoCRepo:
         try:
             self.fork_repo.create_file(COC_FILENAME, commit_message, self.new_contents)
             success = True
-        except github3.exceptions.UnprocessableEntity:
-            logger.warning("Likely file already in %s (%s)",
-                    self.fork_repo.full_name, self.repo.full_name)
-        except github3.exceptions.GitHubError:
-            logger.warning("Likely fork hasn't completed for %s (%s)",
-                    self.fork_repo.full_name, self.repo.full_name)
+        except github3.exceptions.UnprocessableEntity as e:
+            logger.warning("Likely file already in %s (%s) code %s",
+                    self.fork_repo.full_name, self.repo.full_name,
+                    e.code)
+        except github3.exceptions.GitHubError as e:
+            logger.warning("Likely fork hasn't completed for %s (%s) code %s",
+                    self.fork_repo.full_name, self.repo.full_name,
+                    e.code)
         return success
 
     @backoff.on_exception(backoff.expo,
@@ -273,18 +276,23 @@ class CoCRepo:
         else:
             repo = self.repo
             repo.refresh()  # upgrade from short repository to get default branch
+            msg_action = self._find_action("Create missing CoC issue")
             if self.issue_number == COC_NO_ISSUE:
                 # we couldn't open an issue, so put all the explanation
                 # in the PR
-                msg_action = self._find_action("Create missing CoC issue")
                 pr_text = msg_action.body + "\n\n_(Message {})_".format(action.code)
             else:
-                pr_text = "Fixes #{}\n\n_(Message {})_".format(self.issue_number, action.code)
+                # Suggestion from smacleod - more info in rebased PR commit
+                pr_text = "Fixes #{}\n\n".format(self.issue_number) \
+                        + msg_action \
+                        + "\n\n_(Message {})_".format(action.code)
             pr = repo.create_pull("Add Mozilla Code of Conduct",
                     repo.default_branch or "master",
                     "{}:{}".format(self.fork_repo.owner,
                         self.fork_repo.default_branch or "master"),
                         pr_text)
+            # our version of github3.py doesn't support this field :(
+            # pr.update(maintainer_can_modify=True)
             msg = " Created PR #{} ({})".format(pr.number, pr.html_url)
             
         return msg
@@ -384,16 +392,16 @@ class RetryQueue:
                 action = r.action.summary
                 full_name = r.repo.repo.full_name
                 number = r.repo.issue_number
-                if not repo.pr_success:
+                if not r.repo.pr_success:
                     # still not ready
                     if retry < r.max_retries:
-                        needs_retry.append(r)
-                    else:
                         # put back on retry list, since not finished
                         needs_retry.append(r)
+                    else:
                         logger.warning("Giving up on {} for issue {} in {}".format(action, number, full_name))
                 else:
                     logger.info("Succeeded on {} for issue {} in {}".format(action, number, full_name))
+
 
 class GitHubSession:
     def __init__(self, live=True):
@@ -424,7 +432,22 @@ class GitHubSession:
             print("Plan for {}:".format(repo.full_name))
             print("\n".join(indent(4, repo_stats.show_plan())))
 
+    def wait_for_karma(self, min_karma=25, msg=None):
+        while self.gh:
+            core = gh.rate_limit()['resources']['core']
+            if core['remaining'] < min_karma:
+                now = time.time()
+                nap = max(int(core['reset'] - now) + 1, 1)
+                logger.info("napping for %s seconds", nap)
+                if msg:
+                    logger.info(msg)
+                time.sleep(nap)
+            else:
+                break
+
+
     def process_repo(self, full_name):
+        self.wait_for_karma()
         owner, repo_name = full_name.split("/", 1)
         r = self.gh.repository(owner=owner, repository=repo_name)
         if r:
