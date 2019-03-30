@@ -102,6 +102,7 @@ class CoCRepo:
         self.plan = []
         self.actions = []
         self.ignore_reasons = []
+        self.my_login = gh.me().login
         self._update_state()
 
     def _update_state(self):
@@ -158,15 +159,14 @@ class CoCRepo:
         if len(ignore_reasons) == 0:
             # check for already handled (no nagging yet)
             has_issue = has_pr = False
-            my_login = gh.me().login
             for issue in self.repo.issues(state="open"):
-                if issue.user.login == my_login:
+                if issue.user.login == self.my_login:
                     # remember the issue, so we don't open another
                     self.issue_number = issue.number
                     has_issue = True
                     break
             for pr in self.repo.pull_requests(state="open"):
-                if pr.user.login == my_login:
+                if pr.user.login == self.my_login:
                     has_pr = True
                     break
             if has_issue and has_pr:
@@ -284,7 +284,7 @@ class CoCRepo:
             else:
                 # Suggestion from smacleod - more info in rebased PR commit
                 pr_text = "Fixes #{}\n\n".format(self.issue_number) \
-                        + msg_action \
+                        + msg_action.body \
                         + "\n\n_(Message {})_".format(action.code)
             pr = repo.create_pull("Add Mozilla Code of Conduct",
                     repo.default_branch or "master",
@@ -301,6 +301,8 @@ class CoCRepo:
         return ""
 
     def _dispatch(self, action):
+        logger.error("in _dispatch")
+        ghs.wait_for_karma(min_karma=500)
         extra_text = ""
         if action.code in ("COC001", "COC003"):
             extra_text = self._open_issue(action)
@@ -336,6 +338,8 @@ class CoCRepo:
         return self.plan
 
     def execute_plan(self, contents=None):
+        logger.error("in execute_plan")
+        ghs.wait_for_karma(min_karma=500)
         # cache contents in case needed.
         self.new_contents = contents
         print("Plan for {}:".format(self.repo.full_name))
@@ -424,6 +428,8 @@ class GitHubSession:
         
 
     def _process_repo(self, repo):
+        logger.error("in _process_repo")
+        self.wait_for_karma(min_karma=500)
         repo_stats = CoCRepo(repo)
         repo_stats.plan_actions()
         if self.live:
@@ -433,12 +439,18 @@ class GitHubSession:
             print("\n".join(indent(4, repo_stats.show_plan())))
 
     def wait_for_karma(self, min_karma=25, msg=None):
+        logger.error("in wait_for_karma")
         while self.gh:
             core = gh.rate_limit()['resources']['core']
-            if core['remaining'] < min_karma:
+            remaining = core['remaining']
+            if gh.ratelimit_remaining != remaining:
+                logger.error("Rate Limit diff! reported: %s, calculated: %s", gh.ratelimit_remaining, remaining)
+            logger.error("Remaining: %s", remaining)
+            if remaining < min_karma:
                 now = time.time()
                 nap = max(int(core['reset'] - now) + 1, 1)
-                logger.info("napping for %s seconds", nap)
+                logger.error("napping for %s seconds, %s remaining",
+                        nap, remaining)
                 if msg:
                     logger.info(msg)
                 time.sleep(nap)
@@ -447,7 +459,8 @@ class GitHubSession:
 
 
     def process_repo(self, full_name):
-        self.wait_for_karma()
+        logger.error("in process_repo")
+        self.wait_for_karma(min_karma=500)
         owner, repo_name = full_name.split("/", 1)
         r = self.gh.repository(owner=owner, repository=repo_name)
         if r:
@@ -472,17 +485,27 @@ def parse_args():
 
 
 def main():
+    logger.error("in main")
     args = parse_args()
-    gh = GitHubSession(args.live)
-    for target in args.targets:
-        if "/" in target:
-            gh.process_repo(target)
-        else:
-            gh.process_org(target)
-    # process any retry queue entries
-    RetryQueue.retry_waiting()
+    global ghs
+    ghs = None
+    try:
+        ghs = GitHubSession(args.live)
+        for target in args.targets:
+            if "/" in target:
+                ghs.process_repo(target)
+            else:
+                ghs.process_org(target)
+        # process any retry queue entries
+        RetryQueue.retry_waiting()
+    except Exception as e:
+        logger.error("GH rate limit status: %s",
+                str(ghs.gh.rate_limit() if ghs else "no ghs"))
+        raise
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s",
+            filename="/tmp/coc.log")
+    logging.getLogger('github3').setLevel(logging.ERROR)
     main()
