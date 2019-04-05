@@ -33,3 +33,9 @@
   lock: False
   close: True
 
+- organization: mozilla
+  repository: version-control-tools
+  close: True
+  lock: True
+  message: (Automated Close) Please do not file PRs here, see https://mozilla-version-control-tools.readthedocs.io/en/latest/devguide/contributing.html
+
