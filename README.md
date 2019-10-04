@@ -6,6 +6,15 @@ not yet been released.** See
 
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 
+## Jupyter Notebooks
+### User Search.ipynb
+Given a set of possible GitHub logins, determine if they might have any
+permissions in various organizations. Links are provided for hits, so easy to
+examine more closely.
+
+N.B.: Both this script and the GitHub search interface make assumptions. It is
+*your* responsibility to ensure any possible match is a valid match.
+
 ## Scripts
 ### auditlog.py
 Download audit log for $ORG via headless firefox via selenium
