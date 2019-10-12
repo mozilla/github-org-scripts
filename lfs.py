@@ -19,8 +19,8 @@ Requires both firefox and geckodriver to be in the path, and compatible.
 logger = logging.getLogger(__name__)
 
 URL = "https://github.com/organizations/mozilla/settings/billing"
-GH_LOGIN = os.getenv('GH_LOGIN', "org_owner_login")
-GH_PASSWORD = os.getenv('GH_PASSWORD', 'password')
+GH_LOGIN = os.getenv('GH_LOGIN', None)
+GH_PASSWORD = os.getenv('GH_PASSWORD', None)
 
 
 
@@ -58,6 +58,9 @@ def parse_args():
     parser.add_argument('--no-headless', action='store_false', dest='headless',
                         help='Make the browser window visible')
     args = parser.parse_args()
+    # check for env vars
+    if not (GH_LOGIN and GH_PASSWORD):
+        parser.error("You must set environment variables GH_LOGIN & GH_PASSWORD")
     return args
 
 
