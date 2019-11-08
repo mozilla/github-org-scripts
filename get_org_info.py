@@ -23,15 +23,15 @@ from client import get_github3_client  # NOQA
 logger = logging.getLogger(__name__)
 DEBUG = False
 
-def show_info(gh, org, show_owners=False, show_emails=False):
+def show_info(gh, org_name, show_owners=False, show_emails=False):
     def miss():
         return "<hidden>"
     try:
-        org = gh.organization(org)
+        org = gh.organization(org_name)
         orgd = defaultdict(miss, org.as_dict())
         v4decoded = "{:03}:{}{}".format(len(orgd['type']), orgd['type'], str(org.id))
         v4encoded = base64.b64encode(v4decoded)
-        print("{:>15}: {!s}".format("Name", org.name))
+        print("{:>15}: {!s}".format("Name", org.name or org_name))
         print("{:>15}: {!s}".format("API v3 id", org.id))
         print("{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded)))
         print("{:>15}: {!s}".format("contact", org.email))
