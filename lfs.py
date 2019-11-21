@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
     Extract current LFS stats from GitHub web UI
-'''
+"""
 from __future__ import print_function
 import json
 import os
@@ -11,18 +11,16 @@ from github_selenium import GitHub2FA, WebDriverException
 import argparse
 import logging
 
-_epilog = '''
+_epilog = """
 Requires both firefox and geckodriver to be in the path, and compatible.
-'''
+"""
 
 
 logger = logging.getLogger(__name__)
 
 URL = "https://github.com/organizations/mozilla/settings/billing"
-GH_LOGIN = os.getenv('GH_LOGIN', "org_owner_login")
-GH_PASSWORD = os.getenv('GH_PASSWORD', 'password')
-
-
+GH_LOGIN = os.getenv("GH_LOGIN", None)
+GH_PASSWORD = os.getenv("GH_PASSWORD", None)
 
 
 class LFS_Usage(GitHub2FA):
@@ -33,31 +31,49 @@ class LFS_Usage(GitHub2FA):
         e = self.get_element(selector)
         if e:
             text = e.text
-            match = re.match(r'''\D+(?P<used>\S+)\D+(?P<purchased>\S+)''', text)
+            # line format: 13,929.6 GB of 17,400 GB (29 data packs)
+            match = re.match(r"""\D*(?P<used>\S+)\D+(?P<purchased>\S+)""", text)
             if match:
                 d = match.groupdict()
-                used = float(d['used'].replace(',', ''))
-                purchased = float(d['purchased'].replace(',', ''))
+                used = float(d["used"].replace(",", ""))
+                purchased = float(d["purchased"].replace(",", ""))
+            else:
+                print("no match for '{}'".format(selector))
+                print("    for text '{}'".format(text))
+                used = purchased = None
         else:
             print("no element for '{}'".format(selector))
             used = purchased = None
         return used, purchased
 
-
     def get_usage(self):
         r = {}
-        r['bw_used'], r['bw_purchased'] = self.get_values('div.mt-2:nth-child(4)')
-        r['sp_used'], r['sp_purchased'] = self.get_values('div.mt-2:nth-child(5)')
+
+        r["sp_used"], r["sp_purchased"] = self.get_values(
+            "div.Box-row:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)"
+        )
+
+        r["bw_used"], r["bw_purchased"] = self.get_values(
+            "div.Box-row:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)"
+        )
         return r
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__, epilog=_epilog)
-    parser.add_argument('--debug', action='store_true',
-                        help='Drop into debugger on error')
-    parser.add_argument('--no-headless', action='store_false', dest='headless',
-                        help='Make the browser window visible')
+    parser.add_argument(
+        "--debug", action="store_true", help="Drop into debugger on error"
+    )
+    parser.add_argument(
+        "--no-headless",
+        action="store_false",
+        dest="headless",
+        help="Make the browser window visible",
+    )
     args = parser.parse_args()
+    # check for env vars
+    if not (GH_LOGIN and GH_PASSWORD):
+        parser.error("You must set environment variables GH_LOGIN & GH_PASSWORD")
     return args
 
 
@@ -75,14 +91,15 @@ def main():
         driver = None
     if not driver:
         from selenium.webdriver.firefox.options import Options
+
         opts = Options()
         opts.log.level = "trace"
         try:
             token = input("token please: ")
             driver = LFS_Usage(headless=args.headless, options=opts)
-            driver.login(GH_LOGIN, GH_PASSWORD, URL, 'Billing', token)
+            driver.login(GH_LOGIN, GH_PASSWORD, URL, "Billing", token)
             results = driver.get_usage()
-            results['time'] = time.strftime('%Y-%m-%d %H:%M')
+            results["time"] = time.strftime("%Y-%m-%d %H:%M")
             print(json.dumps(results))
         except WebDriverException:
             quit = not args.debug
@@ -94,8 +111,11 @@ def main():
         if quit:
             driver.quit()
         else:
-            import pdb; pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
+
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
+    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
     main()
