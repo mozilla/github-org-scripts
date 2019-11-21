@@ -31,7 +31,7 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
         orgd = defaultdict(miss, org.as_dict())
         v4decoded = "{:03}:{}{}".format(len(orgd['type']), orgd['type'], str(org.id))
         v4encoded = base64.b64encode(v4decoded)
-        print("{:>15}: {!s}".format("Name", org.name or org_name))
+        print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
         print("{:>15}: {!s}".format("API v3 id", org.id))
         print("{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded)))
         print("{:>15}: {!s}".format("contact", org.email))
@@ -55,8 +55,8 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
                     email = ""
                 print("                  {} ({}{})".format(name,
                     owner.login, email))
-    except Exception:
-        logger.error("Error obtaining data for org '%s'", str(org))
+    except Exception as e:
+        logger.error("Error %s obtaining data for org '%s'", str(e), str(org))
     finally:
         if DEBUG:
             from pprint import pprint
