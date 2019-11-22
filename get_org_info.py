@@ -23,27 +23,30 @@ from client import get_github3_client  # NOQA
 logger = logging.getLogger(__name__)
 DEBUG = False
 
+
 def show_info(gh, org_name, show_owners=False, show_emails=False):
     def miss():
         return "<hidden>"
+
     try:
         org = gh.organization(org_name)
         orgd = defaultdict(miss, org.as_dict())
-        v4decoded = "{:03}:{}{}".format(len(orgd['type']), orgd['type'], str(org.id))
+        v4decoded = "{:03}:{}{}".format(len(orgd["type"]), orgd["type"], str(org.id))
         v4encoded = base64.b64encode(v4decoded)
         print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
         print("{:>15}: {!s}".format("API v3 id", org.id))
-        print("{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded)))
+        print(
+            "{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded))
+        )
         print("{:>15}: {!s}".format("contact", org.email))
-        print("{:>15}: {!s}".format("billing", orgd['billing_email']))
-        print("{:>15}: {!s}".format("private repos",
-                                    orgd['owned_private_repos']))
+        print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
+        print("{:>15}: {!s}".format("private repos", orgd["owned_private_repos"]))
         # Nested dictionaries need special handling
-        plan = orgd['plan']
+        plan = orgd["plan"]
         if not isinstance(plan, dict):
             plan = defaultdict(miss)
-        print("{:>15}: {!s}".format("plan", plan['name']))
-        print("{:>15}: {!s}".format("seats", plan['filled_seats']))
+        print("{:>15}: {!s}".format("plan", plan["name"]))
+        print("{:>15}: {!s}".format("seats", plan["filled_seats"]))
         if show_owners:
             print("{:>15}:".format("Org Owners"))
             for owner in org.members(role="admin"):
@@ -53,28 +56,43 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
                     email = " " + (owner.email or "<email hidden>")
                 else:
                     email = ""
-                print("                  {} ({}{})".format(name,
-                    owner.login, email))
+                print("                  {} ({}{})".format(name, owner.login, email))
     except Exception as e:
         logger.error("Error %s obtaining data for org '%s'", str(e), str(org))
     finally:
         if DEBUG:
             from pprint import pprint
+
             pprint(orgd)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__, epilog=_epilog)
-    parser.add_argument("--debug", action='store_true',
-                        help="include dump of all data returned")
-    parser.add_argument("--owners", action='store_true', help="Also show owners")
-    parser.add_argument("--email", action='store_true', help="include owner email")
-    parser.add_argument("--all-my-orgs", action='store_true',
-                        help="act on all orgs for which you're an owner")
-    parser.add_argument("orgs", nargs='*', default=['mozilla', ],
-                        help='github organizations to check (defaults to '
-                             'mozilla)')
+    parser.add_argument(
+        "--debug", action="store_true", help="include dump of all data returned"
+    )
+    parser.add_argument("--owners", action="store_true", help="Also show owners")
+    parser.add_argument("--email", action="store_true", help="include owner email")
+    parser.add_argument(
+        "--all-my-orgs",
+        action="store_true",
+        help="act on all orgs for which you're an owner",
+    )
+    parser.add_argument(
+        "--names-only",
+        action="store_true",
+        help="Only output your org names for which you're an owner",
+    )
+    parser.add_argument(
+        "orgs", nargs="*", help="github organizations to check (defaults to " "mozilla)"
+    )
     args = parser.parse_args()
+    if args.names_only:
+        args.all_my_orgs = True
+        if args.owners or args.email:
+            parser.error("Can't specify owners or emails with --all-my-orgs")
+    if args.all_my_orgs and len(args.orgs):
+        parser.error("Can't specify orgs with --all-my-orgs")
     if args.email and not args.owners:
         # implies owners
         args.owners = True
@@ -89,11 +107,12 @@ def parse_args():
 class MyOrganizationsIterator(github3.structs.GitHubIterator):
     def __init__(self, me):
         super(MyOrganizationsIterator, self).__init__(
-            count=-1, #get all
+            count=-1,  # get all
             url=me.session.base_url + "/user/orgs",
             cls=github3.orgs.Organization,
             session=me.session,
         )
+
 
 def main():
     args = parse_args()
@@ -102,14 +121,16 @@ def main():
         if args.all_my_orgs:
             authorized_user = gh.me()
             me = gh.user(authorized_user.login)
-            args.orgs = []
             my_orgs = MyOrganizationsIterator(me)
             for org in my_orgs:
                 owner_logins = [u.login for u in org.members(role="admin")]
                 if me.login in owner_logins:
                     args.orgs.append(org.login)
+            if args.names_only:
+                print("\n".join(sorted(args.orgs)))
+                return
 
-        newline=""
+        newline = ""
         for org in args.orgs:
             if len(args.orgs) > 1:
                 print("{}Processing org {}".format(newline, org))
@@ -117,6 +138,6 @@ def main():
             show_info(gh, org, args.owners, args.email)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
     main()
