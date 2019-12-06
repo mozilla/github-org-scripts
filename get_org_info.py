@@ -40,6 +40,8 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
         )
         print("{:>15}: {!s}".format("contact", org.email))
         print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
+        print("{:>15}: {!s}".format("2FA required",
+            orgd["two_factor_requirement_enabled"]))
         print("{:>15}: {!s}".format("private repos", orgd["owned_private_repos"]))
         # Nested dictionaries need special handling
         plan = orgd["plan"]
