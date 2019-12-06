@@ -10,6 +10,7 @@ import logging
 import sys
 
 from client import get_github3_client
+import github3
 
 
 TEAM = 'admin-all-org-'
@@ -51,16 +52,21 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     for login in to_add:
         if VERBOSE:
             print("    {} is new".format(login))
-        if do_update and not team.add_member(login):
-            logger.warn("Failed to add a member"
-                    " - you need 'admin:org' permissions")
+        try:
+            if do_update and not team.add_member(login):
+                logger.warn("Failed to add a member"
+                        " - you need 'admin:org' permissions")
+                update_success = False
+                break
+        except github3.exceptions.ForbiddenError:
+            # this occurs occasionally, don't stop work
+            logger.warn("Failed to add member '{}'".format(login))
             update_success = False
-            break
     print "%5d no change" % len(no_change)
     # if we're running in the ipython notebook, the log message isn't
     # displayed. Output something useful
     if not update_success:
-        print "Updates were not made to team '%s' in '%s'." % (team_name, org.name)
+        print "Updates were not all made to team '%s' in '%s'." % (team_name, org.name)
         print "Make sure your API token has 'admin:org' permissions for that organization."
 
 
