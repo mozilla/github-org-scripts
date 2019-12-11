@@ -1,8 +1,7 @@
 # github org helper scripts
 
-**NOTE: branch 'invitations' requires a version of github3.py which has
-not yet been released.** See
-[PR](https://github.com/sigmavirus24/github3.py/pull/675) for details.
+**NOTE: the main helper library, GitHub3.py, has been updated to version 1.3.0.
+Not all scripts have been verified against this version.**
 
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 
@@ -30,14 +29,18 @@ Find all hooks configured for an organization -- see --help for details
 ### get_org_info.py
 Output basic info about an org, more if you have permissions. See --help for details
 
-### team_update.py
-Update administrative teams so they can be used for the new GitHub discussion
-feature. Use the ``--help`` option for more information.
-
 ### lfs.py
 Get current LFS Billing values using a headless firefox via selenium
 (``geckodriver`` must be installed). Credentials as environment
 variables, and 2FA token passed as input.
+
+### manage_invitations.py
+Cancel all org & repository invitations older than a specified age (default 2
+weeks). See --help for details.
+
+### team_update.py
+Update administrative teams so they can be used for the new GitHub discussion
+feature. Use the ``--help`` option for more information.
 
 ### Audit logs
 Sadly, the org audit log does not have an API, so we'll screen scrape a little.
