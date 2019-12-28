@@ -4,6 +4,7 @@
 """
 import argparse
 import logging
+
 try:
     from functools import lru_cache
 except ImportError:
@@ -11,7 +12,9 @@ except ImportError:
     def lru_cache(param):
         def identity(func):
             return func
+
         return identity
+
 
 from client import get_github3_client
 
@@ -54,20 +57,25 @@ def gh():
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("repos", nargs='+',
-                        help='Repositories to check. Can be owner/repo or'
-                        ' repo')
-    parser.add_argument("--org", default='mozilla',
-                        help='Org to use for unqualified repos. Default'
-                        ' mozilla')
-    parser.add_argument("--verbose", action='store_true',
-                        help='print logins for all changes')
-    parser.add_argument('--debug', help="include github3 output",
-                        action='store_true')
+    parser.add_argument(
+        "repos", nargs="+", help="Repositories to check. Can be owner/repo or" " repo"
+    )
+    parser.add_argument(
+        "--org",
+        default="mozilla",
+        help="Org to use for unqualified repos. Default" " mozilla",
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="print logins for all changes"
+    )
+    parser.add_argument("--debug", help="include github3 output", action="store_true")
+    parser.add_argument(
+        "--email", help="output email addresses only", action="store_true"
+    )
     args = parser.parse_args(args)
     if args.debug:
         logger.setLevel(logging.DEBUG)
-        logging.getLogger('github3').setLevel(logging.DEBUG)
+        logging.getLogger("github3").setLevel(logging.DEBUG)
     global VERBOSE
     VERBOSE = args.verbose
     return args
@@ -80,7 +88,7 @@ def fetch_owners(login):
     """
     owners = set()
     org = gh().organization(login)
-    for user in org.members(role='admin'):
+    for user in org.members(role="admin"):
         owners.add(user.login)
     return owners
 
@@ -92,7 +100,7 @@ def fetch_admins(owner, repo):
     admins = set()
     repo = gh().repository(owner, repo)
     for collaborator in repo.collaborators():
-        if collaborator.permissions['admin']:
+        if collaborator.permissions["admin"]:
             admins.add(collaborator.login)
     return admins
 
@@ -106,17 +114,35 @@ def process_repo(owner, repo):
     return admins - owners
 
 
+def email_of(login):
+    """ return email of login, and link to find in people.m.o
+
+        returned line has email first, then ',' then people.m.o link
+
+        email address can be obtained by piping to `cut -d\, -f 1`
+
+        ToDo:
+            - link to iam, so can map verified github login to email
+              from there.
+    """
+    u = gh().user(login)
+    pmo_url = "https://people.mozilla.org/s?query={}&who=all".format(login)
+    email = u.email if u.email else ""
+    return "{},{}".format(email, pmo_url)
+
+
 def main(args=None):
     args = parse_args(args=args)
     for repo in args.repos:
         owner_name, repo_name = unpack_repo(repo, default=args.org)
         admins = process_repo(owner_name, repo_name)
         print("{}/{}:".format(owner_name, repo_name))
-        for u in admins:
-            print(u)
+        for login in admins:
+            output = login if not args.email else email_of(login)
+            print(output)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
-    logging.getLogger('github3').setLevel(logging.WARNING)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
+    logging.getLogger("github3").setLevel(logging.WARNING)
     raise SystemExit(main())
