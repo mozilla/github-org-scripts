@@ -1,9 +1,13 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 """
     Report on the non-owner admins of the specified repo
 """
+
 import argparse
 import logging
+
+import argcomplete
 
 try:
     from functools import lru_cache
@@ -72,6 +76,7 @@ def parse_args(args=None):
     parser.add_argument(
         "--email", help="output email addresses only", action="store_true"
     )
+    argcomplete.autocomplete(parser)
     args = parser.parse_args(args)
     if args.debug:
         logger.setLevel(logging.DEBUG)
