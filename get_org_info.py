@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 """
     Report Basic info about orgs
 """
@@ -17,6 +18,7 @@ import base64
 import logging  # NOQA
 from collections import defaultdict  # NOQA
 
+import argcomplete
 import github3  # NOQA
 from client import get_github3_client  # NOQA
 
@@ -88,6 +90,7 @@ def parse_args():
     parser.add_argument(
         "orgs", nargs="*", help="github organizations to check (defaults to " "mozilla)"
     )
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
     if args.names_only:
         args.all_my_orgs = True
