@@ -29,6 +29,15 @@ def update_exit_code(new_code):
     exit_code = max(exit_code, new_code)
 
 
+def lock_pr(repo, number):
+    # GitHub3.py does not yet support lock & lock reason on PRs, so convert to
+    # an issue, and use that interface (which still only supports lock, and not
+    # lock reason)
+    pr_as_issue = repo.issue(number)
+    success = pr_as_issue.lock()
+    return success
+
+
 def close_prs(gh, organization=None, repository=None,
               message=None, lock=False, close=False):
     if message is None:
@@ -38,16 +47,18 @@ def close_prs(gh, organization=None, repository=None,
         logger.debug("Checking for PRs in %s", repo.name)
         for pr in repo.pull_requests(state='open'):
             logger.debug("Examining PR %s for %s/%s", pr.number,
-                            organization, repository)
+                         organization, repository)
             if close:
                 pr.create_comment(message)
                 pr.close()
                 logger.info("Closed PR %s for %s/%s", pr.number,
                             organization, repository)
                 if lock:
-                    print("Lock PR manually: "
-                            "https://github.com/%s/%s/pull/%s" %
-                            (organization, repository, pr.number))
+                    success = lock_pr(repo, pr.number)
+                    if not success:
+                        print("Lock PR manually: "
+                                "https://github.com/%s/%s/pull/%s" %
+                                (organization, repository, pr.number))
             else:
                 print("PR %s open for %s/%s at: "
                         "https://github.com/%s/%s/pull/%s" % (pr.number,
