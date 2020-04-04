@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import os
 import time
 
 from github3 import login
@@ -10,9 +11,11 @@ CREDENTIALS_FILE = '.credentials'
 
 def get_token():
     id = token = ''
-    with open(CREDENTIALS_FILE, 'r') as cf:
-        id = cf.readline().strip()
-        token = cf.readline().strip()
+    token = os.environ.get("GITHUB_PAT", "")
+    if not token:
+        with open(CREDENTIALS_FILE, 'r') as cf:
+            id = cf.readline().strip()
+            token = cf.readline().strip()
     return token
 
 
