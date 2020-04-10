@@ -1,9 +1,24 @@
 # github org helper scripts
 
-**NOTE: the main helper library, GitHub3.py, has been updated to version 1.3.0.
-Not all scripts have been verified against this version.**
+**NOTE: the main helper library, GitHub3.py, has been updated to version 1.1.0.
+Not all scripts have been verified against this version yet.**
 
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
+
+## Credentials
+
+Supplying credentials for execution is possible two ways:
+1. provide a GitHub Personal Access Token (PAT) as the value of the environment
+   variable `GITHUB_PAT`. This is the prefered method.
+1. Provide a GitHub PAT as the 2nd line of the file `.credentials`. This file is
+   listed in `.gitignore` to minimize the chance of committing it.
+
+The recommended way to set `GITHUB_PAT` is via cli access to your password
+manager. For example, using [pass][pass]:
+```bash
+GITHUB_PAT=$(pass show myPAT) script args
+```
+[pass]: https://www.passwordstore.org/
 
 ## Jupyter Notebooks
 ### User Search.ipynb
@@ -57,14 +72,6 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 
 ### old_repos.py
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
-
-## Auth
-The API calls need you to authenticate. Generate a "personal access token" on the github settings page, then create a file ``.credentials`` like this:
-
-    johndoe
-    123abcmygithubtoken123...
-
-where the first line is your github username and the second line is the token you generated.
 
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2018 Fred Wenzel and others. For more information read the file ``LICENSE``.
