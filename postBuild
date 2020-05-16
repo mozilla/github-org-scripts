@@ -1,0 +1,26 @@
+### note: may need subconfiguration values as well -- see GUI for current
+###       (i.e. these may not all be defaults)
+#set -ex
+conda install -c conda-forge jupyter_contrib_nbextensions
+conda install -c conda-forge jupyter_nbextensions_configurator
+conda install -c conda-forge ipywidgets
+##jupyter contrib nbextension install --user
+##jupyter nbextensions_configurator enable --user
+
+### ones we need for sure
+##- "initialization cells" aka 'init_cell'
+#jupyter nbextension install init_cell --user
+#jupyter nbextension list
+#jupyter nbextension enable init_cell/main
+#jupyter labextension list --help-all
+#jupyter labextension enable init_cell
+##
+### maybe add
+##- "Select CodeMirror Keymap" aka "select_keymap"
+##- "Tree Filter" aka "tree-filter"
+##- "Codefolding in Editor" aka "codefolding"
+##- "Collapsible Headings" aka "collapsible_headings"
+##
+### debug help
+##- "Nbextensions edit menu item" aka "nbextensions_configurator"
+##- "contrib_nbextensions_help_item"
