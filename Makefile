@@ -1,5 +1,6 @@
-VENV_NAME=venv
-github3_version=1.1.0
+VENV_NAME:=venv
+github3_version:=1.1.0
+port := 10000
 
 .PHONY: help
 help:
@@ -19,7 +20,7 @@ $(VENV_NAME):
 
 SHELL := /bin/bash
 .PHONY: dev
-dev:
+dev: jupyter-config
 	-docker rmi dev:$(github3_version)
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $GITHUB_PAT ]] && exit 3 ; \
@@ -36,6 +37,7 @@ run-dev:
 		[[ -z $GITHUB_PAT ]] && exit 3 ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
+			--publish $(port):8888 \
 			dev:$(github3_version) \
 		& \
 		job_pid=$$! ; \
@@ -45,11 +47,12 @@ run-dev:
 	) '
 
 .PHONY: run-update
-run-update:
+run-update: jupyter-config
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $GITHUB_PAT ]] && exit 3 ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
+			--publish $(port):8888 \
 			--volume "$$PWD:/home/$$USER" \
 			dev:$(github3_version) \
 		& \
@@ -59,5 +62,16 @@ run-update:
 		wait $$job_pid ; \
 	) '
 
+jupyter-config: .jupyter/jupyter_notebook_config.py
+.jupyter/jupyter_notebook_config.py:
+	echo -e >$@ \
+"# disable browser launch (it's in a container)\n"\
+"c.NotebookApp.open_browser = False\n"\
+"# Set connection string\n"\
+"c.NotebookApp.portInt = $(port)\n"\
+"c.NotebookApp.custom_display_url = 'http://localhost:$(port)'\n"\
+"# disable security locally\n"\
+"c.NotebookApp.token = ''\n"\
+"c.NotebookApp.password = ''"
 
 # vim: noet ts=8
