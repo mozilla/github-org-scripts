@@ -1,25 +1,42 @@
-### note: may need subconfiguration values as well -- see GUI for current
-###       (i.e. these may not all be defaults)
-#set -ex
-conda install -c conda-forge jupyter_contrib_nbextensions
-conda install -c conda-forge jupyter_nbextensions_configurator
+#!/bin/bash -i
+# N.B.  the '-i' above is required to fake an interactive shell
+#       the default .bashrc bails if not interactive, but we need
+#       conda's "activate" command to work, which is enabled via .bashrc
+echo "At start: $-"
+case "$-" in
+  *i*)  ;;
+  *)    echo "must run as interactive shell"
+        exit 3
+        ;;
+esac
+#
+# There are two different environments we need to support:
+#   - kernel -- for anything needed by the notebook code itself
+#   - notebook -- for anything used by the Jupyter framework
+#
+
+# We're started in the kernel's environment, so do items needed for that
+# (could be moved to requirements.txt)
 conda install -c conda-forge ipywidgets
-##jupyter contrib nbextension install --user
-##jupyter nbextensions_configurator enable --user
+
+# We need to install the rest into the notebook's environment.
+conda init bash
+. .bashrc
+conda activate notebook
+conda install -c conda-forge jupyter_contrib_nbextensions
 
 ### ones we need for sure
 ##- "initialization cells" aka 'init_cell'
-#jupyter nbextension install init_cell --user
-#jupyter nbextension list
-#jupyter nbextension enable init_cell/main
-#jupyter labextension list --help-all
-#jupyter labextension enable init_cell
+jupyter nbextension enable init_cell/main
+jupyter nbextension enable collapsible_headings/main
 ##
 ### maybe add
 ##- "Select CodeMirror Keymap" aka "select_keymap"
 ##- "Tree Filter" aka "tree-filter"
 ##- "Codefolding in Editor" aka "codefolding"
 ##- "Collapsible Headings" aka "collapsible_headings"
+#jupyter labextension list --help-all
+#jupyter labextension enable init_cell
 ##
 ### debug help
 ##- "Nbextensions edit menu item" aka "nbextensions_configurator"

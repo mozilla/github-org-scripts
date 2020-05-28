@@ -1,6 +1,6 @@
 VENV_NAME:=venv
-github3_version:=1.1.0
-port := 10000
+github3_version:=1.1.1
+port := 10001
 
 .PHONY: help
 help:
@@ -21,7 +21,7 @@ $(VENV_NAME):
 SHELL := /bin/bash
 .PHONY: dev
 dev: jupyter-config
-	-docker rmi dev:$(github3_version)
+	#-docker rmi dev:$(github3_version)
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $GITHUB_PAT ]] && exit 3 ; \
 		repo2docker --image-name "dev:$(github3_version)" \
