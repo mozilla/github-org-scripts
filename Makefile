@@ -23,7 +23,7 @@ SHELL := /bin/bash
 dev: jupyter-config
 	#-docker rmi dev:$(github3_version)
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
-		[[ -z $GITHUB_PAT ]] && exit 3 ; \
+		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		repo2docker --image-name "dev:$(github3_version)" \
 			--env "GITHUB_PAT" \
 			--editable \
@@ -34,7 +34,7 @@ dev: jupyter-config
 .PHONY: run-dev
 run-dev:
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
-		[[ -z $GITHUB_PAT ]] && exit 3 ; \
+		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--publish $(port):8888 \
@@ -42,14 +42,14 @@ run-dev:
 		& \
 		job_pid=$$! ; \
 		sleep 5 ; \
-		docker ps --filter "ancestor=dev:1.1.0" ; \
+		docker ps --filter "ancestor=dev:$(github3_version)" ; \
 		wait $$job_pid ; \
 	) '
 
 .PHONY: run-update
 run-update: jupyter-config
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
-		[[ -z $GITHUB_PAT ]] && exit 3 ; \
+		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--publish $(port):8888 \
@@ -58,7 +58,7 @@ run-update: jupyter-config
 		& \
 		job_pid=$$! ; \
 		sleep 5 ; \
-		docker ps --filter "ancestor=dev:1.1.0" ; \
+		docker ps --filter "ancestor=dev:$(github3_version)" ; \
 		wait $$job_pid ; \
 	) '
 
