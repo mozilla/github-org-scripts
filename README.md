@@ -20,6 +20,13 @@ GITHUB_PAT=$(pass show myPAT) script args
 ```
 [pass]: https://www.passwordstore.org/
 
+## Docker Images
+
+These scripts currently still require python2. The recommended way to deal with
+this is by using docker. Given the complexities of setting up Jupyter to run in
+docker, a helper utility is use: `repo2docker`. The make targets assume that is
+installed. Use `pipx install repo2docker` to install.
+
 ## Jupyter Notebooks
 ### User Search.ipynb
 Given a set of possible GitHub logins, determine if they might have any
