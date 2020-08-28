@@ -1,29 +1,23 @@
-#!/bin/bash -i
-# N.B.  the '-i' above is required to fake an interactive shell
-#       the default .bashrc bails if not interactive, but we need
-#       conda's "activate" command to work, which is enabled via .bashrc
-echo "At start: $-"
-case "$-" in
-  *i*)  ;;
-  *)    echo "must run as interactive shell"
-        exit 3
-        ;;
-esac
+#!/bin/bash
 #
 # There are two different environments we need to support:
-#   - kernel -- for anything needed by the notebook code itself
-#   - notebook -- for anything used by the Jupyter framework
+#   - kernel -- for anything needed by the notebook code itself (py2)
+#   - notebook -- for anything used by the Jupyter framework (py3)
 #
 
-# We're started in the kernel's environment, so do items needed for that
-# (could be moved to requirements.txt)
-conda install -c conda-forge ipywidgets
-
-# We need to install the rest into the notebook's environment.
+# configure to allow conda from terminal (we don't have an interactive one
+# during docker image build, so don't have .bashrc)
 conda init bash
 . .bashrc
+
+# We need ipywidgets for our notebook
+# (could be moved to requirements.txt, but want to keep that CLI only for now)
+conda activate kernel
+conda install -y -c conda-forge ipywidgets
+
+# We need to install the rest into the server's environment.
 conda activate notebook
-conda install -c conda-forge jupyter_contrib_nbextensions
+conda install -y -c conda-forge jupyter_contrib_nbextensions
 
 ### ones we need for sure
 ##- "initialization cells" aka 'init_cell'
