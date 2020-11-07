@@ -2,6 +2,8 @@ VENV_NAME:=venv
 github3_version:=1.1.1
 port := 10001
 
+DOCKER_OPTS :=
+
 .PHONY: help
 help:
 	@echo "Targets available"
@@ -51,6 +53,7 @@ run-update: jupyter-config
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		docker run --rm --publish-all \
+			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
 			--publish $(port):8888 \
 			--volume "$$PWD:/home/$$USER" \
@@ -61,6 +64,10 @@ run-update: jupyter-config
 		docker ps --filter "ancestor=dev:$(github3_version)" ; \
 		wait $$job_pid ; \
 	) '
+
+.PHONY: debug-update
+debug-update:
+	$(MAKE) DOCKER_OPTS="--security-opt=seccomp:unconfined" run-update
 
 jupyter-config: .jupyter/jupyter_notebook_config.py
 .jupyter/jupyter_notebook_config.py:
