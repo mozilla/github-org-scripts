@@ -1,0 +1,63 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-ast
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: check-case-conflict
+    -   id: check-docstring-first
+    -   id: check-merge-conflict
+    -   id: check-toml
+
+-   repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+    -   id: black
+
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v2.7.2
+    hooks:
+    -   id: pyupgrade
+        args: ["--py36-plus"]
+
+- repo: https://github.com/jumanjihouse/pre-commit-hooks
+  rev: master  # or specific git tag
+  hooks:
+    - id: forbid-binary
+    - id: markdownlint # Configure in .mdlrc
+    - id: shellcheck
+
+- repo: https://github.com/IamTheFij/docker-pre-commit
+  rev: v2.0.0
+  hooks:
+        - id: docker-compose-check
+        - id: hadolint
+
+- repo: https://github.com/PyCQA/bandit
+  rev: 1.6.2
+  hooks:
+    - id: bandit
+
+- repo: https://github.com/myint/docformatter
+  rev: v1.3.1
+  hooks:
+    - id: docformatter
+      args: [--in-place]
+
+- repo: https://gitlab.com/iamlikeme/nbhooks
+  rev: ""
+  hooks:
+  - id: nb-ensure-clean
+    #args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
+
+- repo: https://github.com/Yelp/detect-secrets
+  rev: ""
+  hooks:
+    - id: detect-secrets
+      args: ['--baseline', '.secrets.baseline']
+      exclude: .*/tests/.*
