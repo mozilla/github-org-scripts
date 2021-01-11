@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+USAGE="usage: ${0##/} login ...
+Where:
+    login       GitHub login of user to block
+
+Options:
+    -h --help   This help
+    --org       Org to block from (default mozilla)
+
+Environment:
+    GH_TOKEN    PAT token that is admin of org
+"
+
+# defaults
+login=
+org=mozilla
+
+if [ -n "$DEBUG" ]; then
+    PS4=':${LINENO}+'
+    set -x
+fi
+
+# boilerplate
+warn() { for m; do echo "$m" ; done 1>&2 ; }
+die() { warn "$@" ; exit 2 ; }
+usage() { warn "$@" "${USAGE:-}"; test $# -eq 0 ; exit $? ; }
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --org) org="$2" ; shift ;;
+    -h|--help) usage ;;
+    -*) usage "Unknown option '$1'" ;;
+    *) break
+    esac
+    shift
+done
+
+MIN_ARGS=1
+MAX_ARGS=$#     # as many as there are
+[[ $# -lt $MIN_ARGS || $# -lt $MAX_ARGS ]] && usage "Wrong number of args $#"
+[[ -z $GH_TOKEN ]] && usage "Missing GitHub PAT token"
+
+for login in "$@"; do
+    curl -X PUT   \
+        -H "Authorization: token $GH_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/orgs/${org}/blocks/${login}"
+done
