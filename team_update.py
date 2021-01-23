@@ -5,6 +5,8 @@
     e.g. make a team of 'owners' or 'members'. The team must already exist -
     see --help output for names
 """
+from __future__ import print_function
+
 import argparse
 import logging
 import sys
@@ -26,11 +28,22 @@ def team_name(user_type):
     return team_name
 
 
+def get_or_create_team(org, team_name):
+    try:
+        team = [x for x in org.teams() if x.name == team_name][0]
+    except IndexError:
+        # no such team
+        team = org.create_team(team_name)
+        logger.warn("created team {} in {}".format(team_name,
+            org.login))
+    return team
+
+
 def update_team_membership(org, new_member_list, team_name=None, do_update=False):
     # we're using a team to communicate with these folks, update
     # that team to contain exactly new_member_list members
     # team must already exist in the org
-    team = [x for x in org.teams() if x.name == team_name][0]
+    team = get_or_create_team(org, team_name)
     # get set of current members
     current = set([x.login for x in team.members()])
     # get set of new members
@@ -39,7 +52,11 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     to_add = new - current
     no_change = new & current
     update_success = True
-    print "%5d alumni" % len(to_remove)
+    if VERBOSE:
+        print("%5d unchanged" % len(no_change))
+        for login in no_change:
+            print("    {} is unchanged".format(login))
+    print("%5d alumni" % len(to_remove))
     for login in to_remove:
         if do_update and not team.remove_member(login):
             logger.warn("Failed to remove a member"
@@ -48,7 +65,7 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
             break
         if VERBOSE:
             print("    {} has departed".format(login))
-    print "%5d new" % len(to_add)
+    print("%5d new" % len(to_add))
     for login in to_add:
         if VERBOSE:
             print("    {} is new".format(login))
@@ -62,19 +79,20 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
             # this occurs occasionally, don't stop work
             logger.warn("Failed to add member '{}'".format(login))
             update_success = False
-    print "%5d no change" % len(no_change)
+    print("%5d no change" % len(no_change))
     # if we're running in the ipython notebook, the log message isn't
     # displayed. Output something useful
     if not update_success:
-        print "Updates were not all made to team '%s' in '%s'." % (team_name, org.name)
-        print "Make sure your API token has 'admin:org' permissions for that organization."
+        print("Updates were not all made to team '%s' in '%s'." % (team_name, org.name))
+        print("Make sure your API token has 'admin:org' permissions for that organization.")
 
 
 def check_users(gh, org_name, admins_only=True, update_team=False):
 
-    org = gh.organization(org_name)
-    if not org:
-        print('No such org found!')
+    try:
+        org = gh.organization(org_name)
+    except github3.exceptions.NotFoundError:
+        print("Org '{}' does not exist".format(org_name))
         sys.exit(1)
 
     role = 'admin' if admins_only else 'all'

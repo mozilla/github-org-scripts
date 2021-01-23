@@ -10,11 +10,11 @@ CREDENTIALS_FILE = '.credentials'
 
 
 def get_token():
-    id = token = ''
+    token = ''
     token = os.environ.get("GITHUB_PAT", "")
     if not token:
         with open(CREDENTIALS_FILE, 'r') as cf:
-            id = cf.readline().strip()
+            _ = cf.readline().strip()
             token = cf.readline().strip()
     return token
 
