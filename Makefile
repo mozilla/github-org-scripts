@@ -26,8 +26,12 @@ dev: jupyter-config
 	-docker rmi dev:$(github3_version)
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
+		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
+		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
 		repo2docker --image-name "dev:$(github3_version)" \
 			--env "GITHUB_PAT" \
+			--env "CIS_CLIENT_ID" \
+			--env "CIS_CLIENT_SECRET" \
 			--editable \
 			. \
 		; \
@@ -37,8 +41,12 @@ dev: jupyter-config
 run-dev:
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
+		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
+		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
+			--env "CIS_CLIENT_ID" \
+			--env "CIS_CLIENT_SECRET" \
 			--publish $(port):8888 \
 			dev:$(github3_version) \
 		& \
@@ -52,9 +60,13 @@ run-dev:
 run-update: jupyter-config
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
+		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
+		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
+			--env "CIS_CLIENT_ID" \
+			--env "CIS_CLIENT_SECRET" \
 			--publish $(port):8888 \
 			--volume "$$PWD:/home/$$USER" \
 			dev:$(github3_version) \
