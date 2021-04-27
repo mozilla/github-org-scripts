@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
-"""
-    Report Basic info about orgs
-"""
+"""Report Basic info about orgs."""
 from __future__ import print_function
 
 # additional help text
@@ -16,6 +14,7 @@ Current owner list is available via the '--owners' option.
 import argparse  # NOQA
 import base64
 import logging  # NOQA
+import json
 from collections import defaultdict  # NOQA
 
 import argcomplete
@@ -26,13 +25,20 @@ logger = logging.getLogger(__name__)
 DEBUG = False
 
 
-def show_info(gh, org_name, show_owners=False, show_emails=False):
+def jsonl_out(d):
+    print(json.dumps(d))
+
+
+def show_info(gh, org_name, show_owners=False, show_emails=False, show_json=False):
     def miss():
         return "<hidden>"
 
     try:
         org = gh.organization(org_name)
         orgd = defaultdict(miss, org.as_dict())
+        if show_json:
+            jsonl_out(orgd)
+            return
         v4decoded = "{:03}:{}{}".format(len(orgd["type"]), orgd["type"], str(org.id))
         v4encoded = base64.b64encode(v4decoded)
         print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
@@ -42,8 +48,11 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
         )
         print("{:>15}: {!s}".format("contact", org.email))
         print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
-        print("{:>15}: {!s}".format("2FA required",
-            orgd["two_factor_requirement_enabled"]))
+        print(
+            "{:>15}: {!s}".format(
+                "2FA required", orgd["two_factor_requirement_enabled"]
+            )
+        )
         print("{:>15}: {!s}".format("private repos", orgd["owned_private_repos"]))
         # Nested dictionaries need special handling
         plan = orgd["plan"]
@@ -77,6 +86,7 @@ def parse_args():
     )
     parser.add_argument("--owners", action="store_true", help="Also show owners")
     parser.add_argument("--email", action="store_true", help="include owner email")
+    parser.add_argument("--json", action="store_true", help="output as json lines")
     parser.add_argument(
         "--all-my-orgs",
         action="store_true",
@@ -119,28 +129,71 @@ class MyOrganizationsIterator(github3.structs.GitHubIterator):
         )
 
 
+def print_limits(e=None, verbose=False):
+    if e:
+        #         display("API limit reached, try again in 5 minutes.\\n")
+        display(str(e))
+
+    reset_max = reset_min = 0
+    limits = gh.rate_limit()
+    resources = limits["resources"]
+    #     print("{:3d} keys: ".format(len(resources.keys())), resources.keys())
+    #     print(resources)
+    for reset in resources.keys():
+        reset_at = resources[reset]["reset"]
+        reset_max = max(reset_at, reset_max)
+        if not resources[reset]["remaining"]:
+            reset_min = min(reset_at, reset_min if reset_min else reset_at)
+            if verbose:
+                print("EXPIRED for {} {}".format(reset, resources[reset]["remaining"]))
+        else:
+            if verbose:
+                print(
+                    "remaining for {} {}".format(reset, resources[reset]["remaining"])
+                )
+
+    if not reset_min:
+        print("No limits reached currently.")
+    else:
+        print(
+            "Minimum reset at {} UTC ({})".format(
+                time.asctime(time.gmtime(reset_min)),
+                time.asctime(time.localtime(reset_min)),
+            )
+        )
+    print(
+        "All reset at {} UTC".format(
+            time.asctime(time.gmtime(reset_max)),
+            time.asctime(time.localtime(reset_max)),
+        )
+    )
+
+
 def main():
     args = parse_args()
     if args.orgs or args.all_my_orgs:
         gh = get_github3_client()
-        if args.all_my_orgs:
-            authorized_user = gh.me()
-            me = gh.user(authorized_user.login)
-            my_orgs = MyOrganizationsIterator(me)
-            for org in my_orgs:
-                owner_logins = [u.login for u in org.members(role="admin")]
-                if me.login in owner_logins:
-                    args.orgs.append(org.login)
-            if args.names_only:
-                print("\n".join(sorted(args.orgs)))
-                return
+        try:
+            if args.all_my_orgs:
+                authorized_user = gh.me()
+                me = gh.user(authorized_user.login)
+                my_orgs = MyOrganizationsIterator(me)
+                for org in my_orgs:
+                    owner_logins = [u.login for u in org.members(role="admin")]
+                    if me.login in owner_logins:
+                        args.orgs.append(org.login)
+                if args.names_only:
+                    print("\n".join(sorted(args.orgs)))
+                    return
 
-        newline = ""
-        for org in args.orgs:
-            if len(args.orgs) > 1:
-                print("{}Processing org {}".format(newline, org))
-                newline = "\n"
-            show_info(gh, org, args.owners, args.email)
+            newline = ""
+            for org in args.orgs:
+                if len(args.orgs) > 1 and not args.json:
+                    print("{}Processing org {}".format(newline, org))
+                    newline = "\n"
+                show_info(gh, org, args.owners, args.email, args.json)
+        except github3.exceptions.ForbiddenError as e:
+            print_limits(e)
 
 
 if __name__ == "__main__":
