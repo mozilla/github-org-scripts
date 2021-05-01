@@ -2,7 +2,7 @@
 import sys
 
 from client import get_github3_client
-from github3.exceptions import UnprocessableResponseBody
+from github3.exceptions import UnprocessableResponseBody, NotFoundError
 
 
 def get_files(repo, directory):
@@ -12,7 +12,14 @@ def get_files(repo, directory):
     stable, so some coding-by-coincidence is used.
     """
     names = None
-    response = repo.file_contents(directory)
+    try:
+        response = repo.file_contents(directory)
+    except UnprocessableResponseBody as e:
+        response = e
+        pass
+    except NotFoundError:
+        print(f"\nNo data for {repo.full_name}! (maybe empty)")
+        return names
     if isinstance(response, UnprocessableResponseBody):
         # response.body contains json of the directory contents as a list of
         # dictionaries. The calling code wants a dictionary with file
@@ -30,7 +37,7 @@ if __name__ == "__main__":
     good_repos = []
     bad_repos = []
 
-    repos = gh.organization("mozilla").repositories(type="sources")
+    repos = gh.organization("mozilla-services").repositories(type="sources")
     for repo in repos:
         # All files in this repo's default branch.
         # {'filename.md': Content(), 'filename2.txt': Contents(), ...}

@@ -34,16 +34,14 @@ logger = logging.getLogger(__name__)
 
 def remove_login_from_org(login, org_name):
     org = gh.organization(org_name)
-    user = org.membership(login)
+    user = org.is_member(login)
     if user:
-        if user["role"] in ["admin"]:
-            logger.warn(f"manually change {login} to a member first")
-        else:
-            if not dry_run:
-                if org.remove_membership(login):
-                    logger.info(f"removed {login} from {org_name}")
-                else:
-                    logger.error(f"ERROR removing {login} from {org_name}")
+        # just remove - no longer any reason to check for type of membership
+        if not dry_run:
+            if org.remove_membership(login):
+                logger.info(f"removed {login} from {org_name}")
+            else:
+                logger.error(f"ERROR removing {login} from {org_name}")
     # remove any outside collaborator settings
     # HACK - no method, so hack the URL and send it directly
     oc_url = org._json_data["issues_url"].replace("issues", "outside_collaborators")

@@ -122,12 +122,13 @@ def check_invites(gh, org_name, cancel=False, cutoff_delta="weeks=-2"):
                 github3.exceptions.NotFoundError,
                 github3.exceptions.ConnectionError,
             ) as e:
-                # just report
-                logger.warning(
-                    "Got 404 for invitation in {}, may be unhandled inviations. '{}'".format(
-                        repo.name, str(e)
+                # just report, unless it's a security repo
+                if "-ghsa-" not in repo.name:
+                    logger.warning(
+                        "Got 404 for invitation in {}, may be unhandled inviations. '{}'".format(
+                            repo.name, str(e)
+                        )
                     )
-                )
 
 
 def parse_args():
