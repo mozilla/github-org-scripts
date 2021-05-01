@@ -1,4 +1,3 @@
-
 __doc__ = """Searches for code across multiple github orgs."""
 
 import argparse
@@ -27,7 +26,7 @@ def parse_args():
     parser.add_argument("query", type=str,
                         help='code search query. syntax at https://help.github.com/articles/searching-code/')
     parser.add_argument("--orgs", default=DEFAULT_ORGS, nargs='*',
-                        help='organizations to search (defaults to {})'.format(DEFAULT_ORGS))
+                        help=f'organizations to search (defaults to {DEFAULT_ORGS})')
     parser.add_argument("--json",
                         help='path to output json results', type=str, default=None)
     parser.add_argument("--verbose", action='store_true',
@@ -43,14 +42,14 @@ def main():
     json_fout = jsonstreams.Stream(jsonstreams.Type.array, args.json, indent=4) if args.json else None
 
     for org in args.orgs:
-        full_query = 'org:{} {}'.format(org, args.query)
+        full_query = f'org:{org} {args.query}'
 
         if args.verbose:
-            print('searching with query {}'.format(full_query))
+            print(f'searching with query {full_query}')
 
         sleep_if_rate_limited(gh, verbose=args.verbose)
 
-        print("{0:<16}{1:<32}{2:<64}".format('org', 'repo', 'file path'))
+        print("{:<16}{:<32}{:<64}".format('org', 'repo', 'file path'))
         for result in gh.search_code(full_query):
             print("{0:<16}{1.repository.name:<32}{1.path:<64}".format(org, result))
 

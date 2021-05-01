@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-"""
-    Extract current LFS stats from GitHub web UI
-"""
-from __future__ import print_function
+"""Extract current LFS stats from GitHub web UI."""
+
+import ast
 import json
 import os
 import re
@@ -38,11 +37,11 @@ class LFS_Usage(GitHub2FA):
                 used = float(d["used"].replace(",", ""))
                 purchased = float(d["purchased"].replace(",", ""))
             else:
-                print("no match for '{}'".format(selector))
-                print("    for text '{}'".format(text))
+                print(f"no match for '{selector}'")
+                print(f"    for text '{text}'")
                 used = purchased = None
         else:
-            print("no element for '{}'".format(selector))
+            print(f"no element for '{selector}'")
             used = purchased = None
         return used, purchased
 
@@ -80,7 +79,7 @@ def parse_args():
 def main():
     args = parse_args()
     print("Obtain current LFS billing info")
-    print("Attempting login as '{}', please enter OTP when asked".format(GH_LOGIN))
+    print(f"Attempting login as '{GH_LOGIN}', please enter OTP when asked")
     print("  (if wrong, set GH_LOGIN & GH_PASSWORD in environtment properly)")
     quit = not args.debug
     try:
@@ -95,7 +94,7 @@ def main():
         opts = Options()
         opts.log.level = "trace"
         try:
-            token = input("token please: ")
+            token = ast.literal_eval(input("token please: "))
             driver = LFS_Usage(headless=args.headless, options=opts)
             driver.login(GH_LOGIN, GH_PASSWORD, URL, "Billing", token)
             results = driver.get_usage()
@@ -106,7 +105,7 @@ def main():
             print("Deep error - did browser crash?")
         except ValueError as e:
             quit = not args.debug
-            print("Navigation issue: {}".format(e.args[0]))
+            print(f"Navigation issue: {e.args[0]}")
 
         if quit:
             driver.quit()

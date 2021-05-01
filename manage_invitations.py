@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-"""
-    Report and manage pending org invitations
-"""
-from __future__ import print_function
+"""Report and manage pending org invitations."""
+
 
 # additional help text
 _epilog = """
@@ -145,7 +143,7 @@ def main():
         gh = get_github3_client()
         for org in args.orgs:
             if len(args.orgs) > 1:
-                print("Processing org {}".format(org))
+                print(f"Processing org {org}")
             check_invites(gh, org, args.cancel, args.cutoff)
 
 

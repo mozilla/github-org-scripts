@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
-"""
-    Report Basic info about orgs
-"""
-from __future__ import print_function
+"""Report Basic info about orgs."""
+
 
 # additional help text
 _epilog = """
@@ -38,7 +36,7 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
         print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
         print("{:>15}: {!s}".format("API v3 id", org.id))
         print(
-            "{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded))
+            "{:>15}: {!s}".format("API v4 id", f"{v4encoded} ({v4decoded})")
         )
         print("{:>15}: {!s}".format("contact", org.email))
         print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
@@ -60,7 +58,7 @@ def show_info(gh, org_name, show_owners=False, show_emails=False):
                     email = " " + (owner.email or "<email hidden>")
                 else:
                     email = ""
-                print("                  {} ({}{})".format(name, owner.login, email))
+                print(f"                  {name} ({owner.login}{email})")
     except Exception as e:
         logger.error("Error %s obtaining data for org '%s'", str(e), str(org))
     finally:
@@ -111,7 +109,7 @@ def parse_args():
 # belongs in authenticated user
 class MyOrganizationsIterator(github3.structs.GitHubIterator):
     def __init__(self, me):
-        super(MyOrganizationsIterator, self).__init__(
+        super().__init__(
             count=-1,  # get all
             url=me.session.base_url + "/user/orgs",
             cls=github3.orgs.Organization,
@@ -138,7 +136,7 @@ def main():
         newline = ""
         for org in args.orgs:
             if len(args.orgs) > 1:
-                print("{}Processing org {}".format(newline, org))
+                print(f"{newline}Processing org {org}")
                 newline = "\n"
             show_info(gh, org, args.owners, args.email)
 

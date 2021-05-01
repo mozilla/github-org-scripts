@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from __future__ import print_function
+
+import ast
 import json
 import os
 import re
@@ -8,7 +9,7 @@ import time
 from github_selenium import GitHub2FA, WebDriverException, webdriver
 
 ORG = os.getenv('ORG', "mozilla")
-URL = "https://github.com/organizations/{}/settings/audit-log".format(ORG)
+URL = f"https://github.com/organizations/{ORG}/settings/audit-log"
 URL_TITLE = "Audit log"
 GH_LOGIN = os.getenv('GH_LOGIN', "org_owner_login")
 GH_PASSWORD = os.getenv('GH_PASSWORD', 'password')
@@ -26,7 +27,7 @@ class Audit_Log_Download(GitHub2FA):
         # we have to create the profile before calling our superclass
         fp = self._buildProfile()
         kwargs['firefox_profile'] = fp
-        super(Audit_Log_Download, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _buildProfile(self):
         fx_profile = webdriver.FirefoxProfile()
@@ -52,7 +53,7 @@ class Audit_Log_Download(GitHub2FA):
                 used = float(d['used'].replace(',', ''))
                 purchased = float(d['purchased'].replace(',', ''))
         else:
-            print("no element for '{}'".format(selector))
+            print(f"no element for '{selector}'")
             used = purchased = None
         return used, purchased
 
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     # if all goes well, we quit. If not user is dropped into pdb while
     # browser is still alive for introspection
     # TODO put behind --debug option
-    print("Download latest audit log for organization {}".format(ORG))
+    print(f"Download latest audit log for organization {ORG}")
     print("Attempting login as '{}', please enter OTP when asked"
           .format(GH_LOGIN))
     print("  (if wrong, set GH_LOGIN & GH_PASSWORD in environtment properly)")
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         driver = None
     if not driver:
         try:
-            token = input("token please: ")
+            token = ast.literal_eval(input("token please: "))
             driver = Audit_Log_Download(headless=HEADLESS)
             driver.login(GH_LOGIN, GH_PASSWORD, URL, URL_TITLE, token)
             results = driver.download_file()
@@ -120,7 +121,7 @@ if __name__ == "__main__":
             print("Deep error - did browser crash?")
         except ValueError as e:
             quit = False
-            print("Navigation issue: {}".format(e.args[0]))
+            print(f"Navigation issue: {e.args[0]}")
 
         if quit:
             # logout first

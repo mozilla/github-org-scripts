@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-"""
-    Close PRs on repositories where the master is not on github.
+"""Close PRs on repositories where the master is not on github.
 
-    Provide a closing comment, and print the lock URL if desired
+Provide a closing comment, and print the lock URL if desired
 """
 
 import argparse
@@ -20,10 +19,10 @@ exit_code = 0
 
 
 def update_exit_code(new_code):
-    """ Update global exit_code, following rules.
+    """Update global exit_code, following rules.
 
-        Current rule is only update if the new value signifies a
-        "more severe" error (higher integer value)
+    Current rule is only update if the new value signifies a "more
+    severe" error (higher integer value)
     """
     global exit_code
     exit_code = max(exit_code, new_code)

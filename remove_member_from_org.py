@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 # ## Remove a login from org
 #
@@ -13,7 +12,7 @@
 # Not yet handled:
 #  - keeping track of when they are team maintainers
 
-from __future__ import print_function
+
 import logging
 import argparse
 
@@ -34,11 +33,11 @@ def remove_login_from_org(login, org_name):
     user = org.membership(login)
     if user:
         if user['role'] in ['admin']:
-            logger.warn("manually change {} to a member first".format(login))
+            logger.warn(f"manually change {login} to a member first")
         else:
             if not dry_run:
                 if org.remove_membership(login):
-                    logger.info("removed {} from {}".format(login, org_name))
+                    logger.info(f"removed {login} from {org_name}")
                 else:
                     logger.error("ERROR removing {} from {}".format(login,
                                                                     org_name))

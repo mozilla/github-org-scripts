@@ -6,3 +6,9 @@ cache/*\.json
 # for jupyter notebooks
 .ipynb*
 .jupyter
+
+# directories created when mounted as $HOME from docker image
+.bash_history
+.ipython/
+.local/
+.vscode/

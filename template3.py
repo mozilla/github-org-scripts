@@ -30,7 +30,7 @@ orgs = ["MozillaReality"]
 # %%
 for o in orgs:
     org = gh.organization(o)
-    print(org.login, org.id)
+    print((org.login, org.id))
 
 
 # %%

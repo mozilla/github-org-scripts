@@ -1,4 +1,3 @@
-
 from datetime import datetime
 import os
 import time
@@ -10,10 +9,10 @@ CREDENTIALS_FILE = '.credentials'
 
 
 def get_token():
-    id = token = ''
+    id = token = ''  # nosec
     token = os.environ.get("GITHUB_PAT", "")
     if not token:
-        with open(CREDENTIALS_FILE, 'r') as cf:
+        with open(CREDENTIALS_FILE) as cf:
             id = cf.readline().strip()
             token = cf.readline().strip()
     return token
@@ -37,6 +36,6 @@ def sleep_if_rate_limited(gh, verbose=False):
             sleep_secs = (reset_dt - now).seconds + 1
 
             if verbose:
-                print('sleeping for', sleep_secs, 'got rate limit', rates['resources']['search'])
+                print(('sleeping for', sleep_secs, 'got rate limit', rates['resources']['search']))
 
             time.sleep(sleep_secs)

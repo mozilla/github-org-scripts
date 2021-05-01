@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-"""
-    Update the membership of a team based on GitHub attributes
+"""Update the membership of a team based on GitHub attributes.
 
-    e.g. make a team of 'owners' or 'members'. The team must already exist -
-    see --help output for names
+e.g. make a team of 'owners' or 'members'. The team must already exist -
+see --help output for names
 """
 import argparse
 import logging
@@ -32,14 +31,14 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     # team must already exist in the org
     team = [x for x in org.teams() if x.name == team_name][0]
     # get set of current members
-    current = set([x.login for x in team.members()])
+    current = {x.login for x in team.members()}
     # get set of new members
-    new = set([x.login for x in new_member_list])
+    new = {x.login for x in new_member_list}
     to_remove = current - new
     to_add = new - current
     no_change = new & current
     update_success = True
-    print "%5d alumni" % len(to_remove)
+    print("%5d alumni" % len(to_remove))
     for login in to_remove:
         if do_update and not team.remove_member(login):
             logger.warn("Failed to remove a member"
@@ -47,11 +46,11 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
             update_success = False
             break
         if VERBOSE:
-            print("    {} has departed".format(login))
-    print "%5d new" % len(to_add)
+            print(f"    {login} has departed")
+    print("%5d new" % len(to_add))
     for login in to_add:
         if VERBOSE:
-            print("    {} is new".format(login))
+            print(f"    {login} is new")
         try:
             if do_update and not team.add_member(login):
                 logger.warn("Failed to add a member"
@@ -60,14 +59,14 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
                 break
         except github3.exceptions.ForbiddenError:
             # this occurs occasionally, don't stop work
-            logger.warn("Failed to add member '{}'".format(login))
+            logger.warn(f"Failed to add member '{login}'")
             update_success = False
-    print "%5d no change" % len(no_change)
+    print("%5d no change" % len(no_change))
     # if we're running in the ipython notebook, the log message isn't
     # displayed. Output something useful
     if not update_success:
-        print "Updates were not all made to team '%s' in '%s'." % (team_name, org.name)
-        print "Make sure your API token has 'admin:org' permissions for that organization."
+        print(f"Updates were not all made to team '{team_name}' in '{org.name}'.")
+        print("Make sure your API token has 'admin:org' permissions for that organization.")
 
 
 def check_users(gh, org_name, admins_only=True, update_team=False):
@@ -85,7 +84,7 @@ def check_users(gh, org_name, admins_only=True, update_team=False):
         print('There are %d %s for org %s:' %
                 (len(members), user_type, org_name))
     else:
-        print("Error: no %s found for %s" % (user_type, org_name))
+        print(f"Error: no {user_type} found for {org_name}")
     if update_team or VERBOSE:
         update_team_membership(org, members, team_name(user_type), update_team)
 
