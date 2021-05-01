@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-"""
-    Print all owner activity from an audit log
-"""
-from __future__ import print_function
+"""Print all owner activity from an audit log."""
 
 import argparse
 import logging
-import subprocess
+import subprocess  # nosec
 
 from client import get_github3_client
 import github3
@@ -14,19 +11,25 @@ import github3
 
 logger = logging.getLogger(__name__)
 
+
 def get_org_access(login, json_file):
-    cmd = ['jq', '-rc',
-           """ .[] | select(.actor == "{}") | select(.action|test("org.")) | [(.created_at/1000 | todate), .actor, .action] | @csv """.format(login)]
-    with open(json_file, 'r') as json:
-        csv_output = subprocess.check_output(cmd, shell=False,
-                stderr=subprocess.STDOUT, stdin=json)
+    cmd = [
+        "jq",
+        "-rc",
+        """ .[] | select(.actor == "{}") | select(.action|test("org.")) | [(.created_at/1000 | todate), .actor, .action] | @csv """.format(
+            login
+        ),
+    ]
+    with open(json_file) as json:
+        csv_output = subprocess.check_output(  # nosec
+            cmd, shell=False, stderr=subprocess.STDOUT, stdin=json
+        )
     return csv_output
 
+
 def process_org(gh, args):
-    """
-    Get owners for specified org, then output actions done by them that
-    required org owner permissions.
-    """
+    """Get owners for specified org, then output actions done by them that
+    required org owner permissions."""
     org = gh.organization(args.org)
     for l in org.members(role="admin"):
         csv = get_org_access(l.login, args.audit_file)
@@ -35,10 +38,8 @@ def process_org(gh, args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--org", default='mozilla',
-                        help='GitHub org to process')
-    parser.add_argument("audit_file",
-                        help='JSON audit log to process')
+    parser.add_argument("--org", default="mozilla", help="GitHub org to process")
+    parser.add_argument("audit_file", help="JSON audit log to process")
     args = parser.parse_args()
     return args
 
@@ -49,6 +50,6 @@ def main():
     process_org(gh, args)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
     main()

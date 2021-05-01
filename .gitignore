@@ -5,3 +5,13 @@ cache/*\.json
 .venv
 # for jupyter notebooks
 .ipynb*
+.jupyter
+
+# for databases created by get_active_hooks
+*\.db
+
+# directories created when mounted as $HOME from docker image
+.bash_history
+.ipython/
+.local/
+.vscode/

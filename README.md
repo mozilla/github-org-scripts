@@ -7,16 +7,13 @@ These are some API helper scripts for sanely managing a github org. For now this
 
 ## Credentials
 
-Supplying credentials for execution is possible two ways:
-1. provide a GitHub Personal Access Token (PAT) as the value of the environment
-   variable `GITHUB_PAT`. This is the prefered method.
-1. Provide a GitHub PAT as the 2nd line of the file `.credentials`. This file is
-   listed in `.gitignore` to minimize the chance of committing it.
+Supplying credentials for execution is done by passing a PAT token as the value
+of the environment variable `GITHUB_TOKEN` (preferred) or `GITHUB_PAT`.
 
-The recommended way to set `GITHUB_PAT` is via cli access to your password
+The recommended way to set `GITHUB_TOKEN` is via cli access to your password
 manager. For example, using [pass][pass]:
 ```bash
-GITHUB_PAT=$(pass show myPAT) script args
+GITHUB_TOKEN=$(pass show myPAT) script args
 ```
 [pass]: https://www.passwordstore.org/
 
@@ -60,13 +57,6 @@ feature. Use the ``--help`` option for more information.
 ### Audit logs
 Sadly, the org audit log does not have an API, so we'll screen scrape a little.
 
-#### audit-log-export.js
-So here's a little bit of JavaScript you can run on any audit log page to export the data into a somewhat more digestible JSON format.
-
-Example URL: https://github.com/orgs/acmecorp/audit-log
-
-Yes, you have to go to the next page and re-run this to get another file.
-
 #### hooks.py
 Analyzes a list of audit log export files (from the JS script) for hook/service creation/deletion and provides a summary. Use it to show commonly used apps/services/webhooks across the org.
 
@@ -74,6 +64,6 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
 
 ## License
-This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2018 Fred Wenzel and others. For more information read the file ``LICENSE``.
+This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2021 Fred Wenzel and others. For more information read the file ``LICENSE``.
 
 [gd_url]: https://github.com/mozilla/geckodriver/releases

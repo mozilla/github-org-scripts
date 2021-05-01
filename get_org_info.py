@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
 """Report Basic info about orgs."""
-from __future__ import print_function
 
 # additional help text
 _epilog = """
@@ -40,12 +39,10 @@ def show_info(gh, org_name, show_owners=False, show_emails=False, show_json=Fals
             jsonl_out(orgd)
             return
         v4decoded = "{:03}:{}{}".format(len(orgd["type"]), orgd["type"], str(org.id))
-        v4encoded = base64.b64encode(v4decoded)
+        v4encoded = base64.b64encode(bytes(v4decoded, "utf-8"))
         print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
         print("{:>15}: {!s}".format("API v3 id", org.id))
-        print(
-            "{:>15}: {!s}".format("API v4 id", "{} ({})".format(v4encoded, v4decoded))
-        )
+        print("{:>15}: {!s}".format("API v4 id", f"{v4encoded} ({v4decoded})"))
         print("{:>15}: {!s}".format("contact", org.email))
         print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
         print(
@@ -69,7 +66,7 @@ def show_info(gh, org_name, show_owners=False, show_emails=False, show_json=Fals
                     email = " " + (owner.email or "<email hidden>")
                 else:
                     email = ""
-                print("                  {} ({}{})".format(name, owner.login, email))
+                print(f"                  {name} ({owner.login}{email})")
     except Exception as e:
         logger.error("Error %s obtaining data for org '%s'", str(e), str(org))
     finally:
@@ -98,7 +95,10 @@ def parse_args():
         help="Only output your org names for which you're an owner",
     )
     parser.add_argument(
-        "orgs", nargs="*", help="github organizations to check (defaults to " "mozilla)"
+        "orgs",
+        nargs="*",
+        help="github organizations to check (defaults to " "mozilla)",
+        default=["mozilla"],
     )
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
@@ -121,7 +121,7 @@ def parse_args():
 # belongs in authenticated user
 class MyOrganizationsIterator(github3.structs.GitHubIterator):
     def __init__(self, me):
-        super(MyOrganizationsIterator, self).__init__(
+        super().__init__(
             count=-1,  # get all
             url=me.session.base_url + "/user/orgs",
             cls=github3.orgs.Organization,
@@ -189,7 +189,7 @@ def main():
             newline = ""
             for org in args.orgs:
                 if len(args.orgs) > 1 and not args.json:
-                    print("{}Processing org {}".format(newline, org))
+                    print(f"{newline}Processing org {org}")
                     newline = "\n"
                 show_info(gh, org, args.owners, args.email, args.json)
         except github3.exceptions.ForbiddenError as e:
