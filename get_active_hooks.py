@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 
 def wait_for_karma(gh, min_karma=25, msg=None):
     while gh:
-        core = gh.rate_limit()['resources']['core']
-        if core['remaining'] < min_karma:
+        core = gh.rate_limit()["resources"]["core"]
+        if core["remaining"] < min_karma:
             now = time.time()
-            nap = max(core['reset'] - now, 0.1)
+            nap = max(core["reset"] - now, 0.1)
             logger.info("napping for %s seconds", nap)
             if msg:
                 logger.info(msg)
@@ -44,24 +44,26 @@ def get_hook_name(hook):
     # several per repo. The unique part is the hook['config']['url'], which
     # may contain sensitive info (including basic login data), so just
     # grab scheme, hostname, and port.
-    if hook['name'] != "web":
-        name = hook['name']
+    if hook["name"] != "web":
+        name = hook["name"]
     else:
-        url = hook['config']['url']
+        url = hook["config"]["url"]
         parts = urllib.parse.urlparse(url)
         # port can be None, which prints funny, but is good enough for
         # identification.
         name = f"{parts.scheme}://{parts.hostname}:{parts.port}"
     return name
 
-def report_hooks(gh, org, active_only=False, unique_only=False,
-        do_ping=False, yaml_out=False):
+
+def report_hooks(
+    gh, org, active_only=False, unique_only=False, do_ping=False, yaml_out=False
+):
     org_handle = gh.organization(org)
-    with tinydb.TinyDB(f'{org}.db') as db:
+    with tinydb.TinyDB(f"{org}.db") as db:
         q = tinydb.Query()
         org_struct = org_handle.as_dict()
         repo_list = []
-        org_struct['repo_list'] = repo_list
+        org_struct["repo_list"] = repo_list
         unique_hooks = set()
         msg = "Active" if active_only else "All"
         for repo in org_handle.repositories():
@@ -74,13 +76,13 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
                 logger.debug(f"Already have data for {repo.name}")
                 # load existing data
                 repo_struct = l[0]
-                hook_list = repo_struct['hook_list']
+                hook_list = repo_struct["hook_list"]
                 repo_hooks = {get_hook_name(x) for x in hook_list}
             else:
                 wait_for_karma(gh, 100, msg=f"waiting at {repo.name}")
                 repo_struct = repo.as_dict()
                 hook_list = []
-                repo_struct['hook_list'] = hook_list
+                repo_struct["hook_list"] = hook_list
                 repo_list.append(repo_struct)
                 ping_attempts = ping_fails = 0
                 for hook in repo.hooks():
@@ -94,12 +96,11 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
                         ping_attempts += 1
                         if not hook.ping():
                             ping_fails += 1
-                            logger.warning('Ping failed for %s', name)
+                            logger.warning("Ping failed for %s", name)
             if repo_hooks and not unique_only:
                 print(f"{msg} hooks for {repo.name}:")
                 if do_ping:
-                    print("  pinged %d (%d failed)" % (
-                        ping_attempts, ping_fails))
+                    print("  pinged %d (%d failed)" % (ping_attempts, ping_fails))
                 for h in repo_hooks:
                     print(f"    {h:s}")
             unique_hooks = unique_hooks.union(repo_hooks)
@@ -107,7 +108,13 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
             if not have_data:
                 db.insert(repo_struct)
     if yaml_out:
-        print(yaml.safe_dump([org_struct, ]))
+        print(
+            yaml.safe_dump(
+                [
+                    org_struct,
+                ]
+            )
+        )
     elif unique_only and unique_hooks:
         print(f"{msg} hooks for org {org}")
         for h in unique_hooks:
@@ -116,14 +123,20 @@ def report_hooks(gh, org, active_only=False, unique_only=False,
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__, epilog=_epilog)
-    parser.add_argument("org", help='Organization', default=['mozilla'],
-                        nargs='*')
-    parser.add_argument("--active", action='store_true',
-                        help="Show active hooks only (not for cached repositories)")
-    parser.add_argument("--unique", help="Show unique hook names only",
-                        action='store_true')
-    parser.add_argument("--ping", action="store_true",
-                        help="Ping all hooks (not for cached repositories)")
+    parser.add_argument("org", help="Organization", default=["mozilla"], nargs="*")
+    parser.add_argument(
+        "--active",
+        action="store_true",
+        help="Show active hooks only (not for cached repositories)",
+    )
+    parser.add_argument(
+        "--unique", help="Show unique hook names only", action="store_true"
+    )
+    parser.add_argument(
+        "--ping",
+        action="store_true",
+        help="Ping all hooks (not for cached repositories)",
+    )
     parser.add_argument("--yaml", help="Yaml ouput only", action="store_true")
     return parser.parse_args()
 
@@ -135,9 +148,9 @@ def main():
         report_hooks(gh, org, args.active, args.unique, args.ping, args.yaml)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-    logging.getLogger('github3').setLevel(logging.WARNING)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    logging.getLogger("github3").setLevel(logging.WARNING)
     try:
         main()
     except KeyboardInterrupt:

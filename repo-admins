@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
-"""
-    Report on the non-owner admins of the specified repo
-"""
+"""Report on the non-owner admins of the specified repo."""
 
 import argparse
 import logging
@@ -28,9 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 def unpack_repo(owner_repo, default=None):
-    """
-    unpack a repostitory specification, which might have the owner login in
-    prepended
+    """unpack a repostitory specification, which might have the owner login in
+    prepended.
 
     >>> unpack_repo('user/repo')
     ('user', 'repo')
@@ -41,7 +38,7 @@ def unpack_repo(owner_repo, default=None):
     """
 
     parts = owner_repo.split("/", 1)
-    if len(parts) is 2:
+    if len(parts) == 2:
         owner, repo = parts
     else:
         owner, repo = default, parts[0]
@@ -50,6 +47,7 @@ def unpack_repo(owner_repo, default=None):
 
 # singleton
 static_gh = None
+
 
 def gh():
     global static_gh
@@ -87,9 +85,7 @@ def parse_args(args=None):
 
 @lru_cache(16)
 def fetch_owners(login):
-    """
-    get all org owners
-    """
+    """get all org owners."""
     owners = set()
     org = gh().organization(login)
     for user in org.members(role="admin"):
@@ -98,9 +94,7 @@ def fetch_owners(login):
 
 
 def fetch_admins(owner, repo):
-    """
-    get all repository admins
-    """
+    """get all repository admins."""
     admins = set()
     repo = gh().repository(owner, repo)
     for collaborator in repo.collaborators():
@@ -110,29 +104,27 @@ def fetch_admins(owner, repo):
 
 
 def process_repo(owner, repo):
-    """
-    Find all repo admins, who are not organization owners
-    """
+    """Find all repo admins, who are not organization owners."""
     owners = fetch_owners(owner)
     admins = fetch_admins(owner, repo)
     return admins - owners
 
 
 def email_of(login):
-    """ return email of login, and link to find in people.m.o
+    r"""return email of login, and link to find in people.m.o
 
-        returned line has email first, then ',' then people.m.o link
+    returned line has email first, then ',' then people.m.o link
 
-        email address can be obtained by piping to `cut -d\, -f 1`
+    email address can be obtained by piping to `cut -d\, -f 1`
 
-        ToDo:
-            - link to iam, so can map verified github login to email
-              from there.
+    ToDo:
+        - link to iam, so can map verified github login to email
+          from there.
     """
     u = gh().user(login)
-    pmo_url = "https://people.mozilla.org/s?query={}&who=all".format(login)
+    pmo_url = f"https://people.mozilla.org/s?query={login}&who=all"
     email = u.email if u.email else ""
-    return "{},{}".format(email, pmo_url)
+    return f"{email},{pmo_url}"
 
 
 def main(args=None):
@@ -140,7 +132,7 @@ def main(args=None):
     for repo in args.repos:
         owner_name, repo_name = unpack_repo(repo, default=args.org)
         admins = process_repo(owner_name, repo_name)
-        print("{}/{}:".format(owner_name, repo_name))
+        print(f"{owner_name}/{repo_name}:")
         for login in admins:
             output = login if not args.email else email_of(login)
             print(output)

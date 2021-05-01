@@ -40,16 +40,17 @@ def show_info(gh, org_name, show_owners=False, show_emails=False, show_json=Fals
             jsonl_out(orgd)
             return
         v4decoded = "{:03}:{}{}".format(len(orgd["type"]), orgd["type"], str(org.id))
-        v4encoded = base64.b64encode(bytes(v4decoded, 'utf-8'))
+        v4encoded = base64.b64encode(bytes(v4decoded, "utf-8"))
         print("{:>15}: {!s} ({})".format("Name", org.name or org_name, orgd["login"]))
         print("{:>15}: {!s}".format("API v3 id", org.id))
-        print(
-            "{:>15}: {!s}".format("API v4 id", f"{v4encoded} ({v4decoded})")
-        )
+        print("{:>15}: {!s}".format("API v4 id", f"{v4encoded} ({v4decoded})"))
         print("{:>15}: {!s}".format("contact", org.email))
         print("{:>15}: {!s}".format("billing", orgd["billing_email"]))
-        print("{:>15}: {!s}".format("2FA required",
-            orgd["two_factor_requirement_enabled"]))
+        print(
+            "{:>15}: {!s}".format(
+                "2FA required", orgd["two_factor_requirement_enabled"]
+            )
+        )
         print("{:>15}: {!s}".format("private repos", orgd["owned_private_repos"]))
         # Nested dictionaries need special handling
         plan = orgd["plan"]
@@ -95,8 +96,10 @@ def parse_args():
         help="Only output your org names for which you're an owner",
     )
     parser.add_argument(
-        "orgs", nargs="*", help="github organizations to check (defaults to " "mozilla)"
-        , default=["mozilla"]
+        "orgs",
+        nargs="*",
+        help="github organizations to check (defaults to " "mozilla)",
+        default=["mozilla"],
     )
     argcomplete.autocomplete(parser)
     args = parser.parse_args()

@@ -12,7 +12,7 @@ from client import get_github3_client
 import github3
 
 
-TEAM = 'admin-all-org-'
+TEAM = "admin-all-org-"
 VERBOSE = False
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,9 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     print("%5d alumni" % len(to_remove))
     for login in to_remove:
         if do_update and not team.remove_member(login):
-            logger.warn("Failed to remove a member"
-                    " - you need 'admin:org' permissions")
+            logger.warn(
+                "Failed to remove a member" " - you need 'admin:org' permissions"
+            )
             update_success = False
             break
         if VERBOSE:
@@ -53,8 +54,9 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
             print(f"    {login} is new")
         try:
             if do_update and not team.add_member(login):
-                logger.warn("Failed to add a member"
-                        " - you need 'admin:org' permissions")
+                logger.warn(
+                    "Failed to add a member" " - you need 'admin:org' permissions"
+                )
                 update_success = False
                 break
         except github3.exceptions.ForbiddenError:
@@ -66,23 +68,24 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     # displayed. Output something useful
     if not update_success:
         print(f"Updates were not all made to team '{team_name}' in '{org.name}'.")
-        print("Make sure your API token has 'admin:org' permissions for that organization.")
+        print(
+            "Make sure your API token has 'admin:org' permissions for that organization."
+        )
 
 
 def check_users(gh, org_name, admins_only=True, update_team=False):
 
     org = gh.organization(org_name)
     if not org:
-        print('No such org found!')
+        print("No such org found!")
         sys.exit(1)
 
-    role = 'admin' if admins_only else 'all'
-    user_type = 'owners' if admins_only else 'members'
+    role = "admin" if admins_only else "all"
+    user_type = "owners" if admins_only else "members"
     members = list(org.members(role=role))
 
     if members:
-        print('There are %d %s for org %s:' %
-                (len(members), user_type, org_name))
+        print("There are %d %s for org %s:" % (len(members), user_type, org_name))
     else:
         print(f"Error: no {user_type} found for {org_name}")
     if update_team or VERBOSE:
@@ -91,16 +94,30 @@ def check_users(gh, org_name, admins_only=True, update_team=False):
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--owners', action='store_true',
-                        help='Report only for org owners (default all members)')
-    parser.add_argument("orgs", nargs='*', default=['mozilla', ],
-                        help='github organizations to check (defaults to mozilla)')
-    parser.add_argument("--team", default=TEAM,
-                        help='update membership of team "%s{owners,members}"' % TEAM)
-    parser.add_argument("--update-team", action='store_true',
-                        help='apply changes to GitHub')
-    parser.add_argument("--verbose", action='store_true',
-                        help='print logins for all changes')
+    parser.add_argument(
+        "--owners",
+        action="store_true",
+        help="Report only for org owners (default all members)",
+    )
+    parser.add_argument(
+        "orgs",
+        nargs="*",
+        default=[
+            "mozilla",
+        ],
+        help="github organizations to check (defaults to mozilla)",
+    )
+    parser.add_argument(
+        "--team",
+        default=TEAM,
+        help='update membership of team "%s{owners,members}"' % TEAM,
+    )
+    parser.add_argument(
+        "--update-team", action="store_true", help="apply changes to GitHub"
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="print logins for all changes"
+    )
     return parser.parse_args()
 
 
@@ -116,6 +133,6 @@ def main():
             check_users(gh, org, args.owners, args.update_team)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARN, format='%(asctime)s %(message)s')
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN, format="%(asctime)s %(message)s")
     main()
