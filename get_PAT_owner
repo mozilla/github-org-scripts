@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+USAGE="usage: ${0##*/} [PAT]
+Return the owner & permissions associated with the PAT
+
+Passing the PAT via the environment variable PAT is prefered and takes
+precedence. The PAT should be passed as an argument as a CI variable reference,
+only where the CI system guarantees the value will not be displayed in any log.
+
+ENVIRONMENT:
+    PAT     The GitHub token to audit
+"
+
+# Defaults
+token="${PAT:-}"
+
+if [ -n "$DEBUG" ]; then
+    PS4=':${LINENO}+'
+    set -x
+fi
+
+# boilerplate
+warn() { for m; do echo "$m" ; done 1>&2 ; }
+die() { warn "$@" ; exit 2 ; }
+usage() { warn "$@" "${USAGE:-}"; test $# -eq 0 ; exit $? ; }
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h|--help) usage ;;
+    -*) usage "Unknown option '$1'" ;;
+    *) break
+    esac
+    shift
+done
+
+MIN_ARGS=0
+MAX_ARGS=1
+[[ $# -lt $MIN_ARGS || $# -gt $MAX_ARGS ]] && usage "Wrong number of args $#"
+
+if [[ -z $token ]]; then
+    if [[ $# -eq 1 ]]; then
+        token="$1"
+    else
+        usage "No PAT supplied"
+    fi
+elif [[ $# -eq 1 ]]; then
+        warn "WARNING: Ignoring command line arguement, using environment variable PAT"
+fi
+
+resp=$(curl --silent --show-error \
+    --include \
+    -H "Authorization: token $token" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/user)
+
+#echo "$resp"
+
+oauth=$(echo "$resp" | grep -i ^X-OAuth-Scopes)
+login=$(echo "$resp" | grep -i -w login | cut -d: -f2)
+id_v4=$(echo "$resp" | grep -i -w node_id | cut -d: -f2)
+
+echo "The PAT is owned by $login $id_v4
+and has the following permissions:
+$oauth"

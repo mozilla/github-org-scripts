@@ -2,7 +2,6 @@
 # PYTHON_ARGCOMPLETE_OK
 """Report Basic info about orgs."""
 
-
 # additional help text
 _epilog = """
 This script outputs some information about organizations, mostly immutable
