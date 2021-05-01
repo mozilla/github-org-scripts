@@ -9,14 +9,16 @@ CREDENTIALS_FILE = '.credentials'
 
 
 def get_token():
-    id = token = ''  # nosec
-    token = os.environ.get("GITHUB_PAT", "")
+    token = os.environ.get("GITHUB_TOKEN") or \
+            os.environ.get("GITHUB_PAT")
     if not token:
-        with open(CREDENTIALS_FILE) as cf:
-            id = cf.readline().strip()
-            token = cf.readline().strip()
+        raise KeyError("""ERROR - GitHub token must be provided via environment"""
+                """ variable "GITHUB_TOKEN" or "GITHUB_PAT"."""
+
+                """ Please delete any old ".credentials" file.""")
     return token
 
+#get_token()
 
 def get_github3_client():
     token = get_token()
