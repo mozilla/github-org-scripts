@@ -24,14 +24,7 @@ SHELL := /bin/bash
 .PHONY: dev
 dev: jupyter-config
 	-docker rmi dev:$(github3_version)
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		repo2docker --image-name "dev:$(github3_version)" \
-			--env "GITHUB_PAT" \
-			--editable \
-			. \
-		; \
-	) '
+	repo2docker --image-name "dev:$(github3_version)" --no-run .
 
 .PHONY: run-dev
 run-dev:
