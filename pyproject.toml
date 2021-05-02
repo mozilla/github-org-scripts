@@ -19,3 +19,4 @@ argcomplete = "^1.12.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
+jupyterlab = "^3.0.14"
