@@ -8,7 +8,7 @@ license = "MPL-2.0"
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonstreams = "=0.4.1"
-PyYaml = "=5.1.2"
+PyYaml = "=5.4"
 tinydb = "=3.2.1"
 github_selenium = { git = "https://github.com/mozilla/github_selenium.git" }
 arrow = "^0.12.1"
