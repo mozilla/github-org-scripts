@@ -1,7 +1,6 @@
 # github org helper scripts
 
-**NOTE: the main helper library, GitHub3.py, has been updated to version 1.1.0.
-Not all scripts have been verified against this version yet.**
+Current minimums: python 3.7; GitHub3.py 1.3.0
 
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 

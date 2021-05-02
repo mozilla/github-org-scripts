@@ -13,9 +13,10 @@ tinydb = "=3.2.1"
 github_selenium = { git = "https://github.com/mozilla/github_selenium.git" }
 arrow = "^0.12.1"
 #"github3.py" = { git = "https://github.com/hwine/github3.py.git", branch = "invitations" }
-"github3.py" = "1.0.0a4"
 jupyter = "^1.0.0"
 argcomplete = "^1.12.3"
+"github3.py" = "<2.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
+jupyterlab = "^3.0.14"

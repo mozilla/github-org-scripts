@@ -98,7 +98,6 @@ def parse_args():
         "orgs",
         nargs="*",
         help="github organizations to check (defaults to " "mozilla)",
-        default=["mozilla"],
     )
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
@@ -106,8 +105,8 @@ def parse_args():
         args.all_my_orgs = True
         if args.owners or args.email:
             parser.error("Can't specify owners or emails with --all-my-orgs")
-    if args.all_my_orgs and len(args.orgs):
-        parser.error("Can't specify orgs with --all-my-orgs")
+    if not args.all_my_orgs and len(args.orgs) == 0:
+        args.orgs = ["mozilla"]
     if args.email and not args.owners:
         # implies owners
         args.owners = True
@@ -185,13 +184,13 @@ def main():
                 if args.names_only:
                     print("\n".join(sorted(args.orgs)))
                     return
-
-            newline = ""
-            for org in args.orgs:
-                if len(args.orgs) > 1 and not args.json:
-                    print(f"{newline}Processing org {org}")
-                    newline = "\n"
-                show_info(gh, org, args.owners, args.email, args.json)
+            else:
+                newline = ""
+                for org in args.orgs:
+                    if len(args.orgs) > 1 and not args.json:
+                        print(f"{newline}Processing org {org}")
+                        newline = "\n"
+                    show_info(gh, org, args.owners, args.email, args.json)
         except github3.exceptions.ForbiddenError as e:
             print_limits(e)
 
