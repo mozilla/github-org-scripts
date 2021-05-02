@@ -2,6 +2,8 @@
 
 Current minimums: python 3.7; GitHub3.py 1.3.0
 
+***Please use [poetry](https://pypi.org/project/poetry/) to manage virtual environments - `requirements.txt` may be out of date, and does not include development dependencies.***
+
 These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
 
 ## Credentials
