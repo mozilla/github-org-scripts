@@ -80,6 +80,14 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 ### old_repos.py
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
 
+## BUGS
+
+* BUG: `postBuild` script not being run on image build
+   - symptom: no collapsable markdown heading
+   - symptom: no "Initialization Cell" checkbox on top right code cell frame
+   - workaround: after start container, get shell and manually run `postBuild` script
+      * must be done after every fresh image start
+
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2018 Fred Wenzel and others. For more information read the file ``LICENSE``.
 
