@@ -17,7 +17,7 @@ repos:
     args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
 
 - repo: https://github.com/Yelp/detect-secrets
-  rev: v0.14.3
+  rev: v1.1.0
   hooks:
     - id: detect-secrets
       args: ['--baseline', '.secrets.baseline']
