@@ -7,31 +7,54 @@
 
 # configure to allow conda from terminal (we don't have an interactive one
 # during docker image build, so don't have .bashrc)
+# 2021-05-24 - we now appear to have a .bashrc, which does an early exit
+# if the session is not interactive. We don't need much, so just rename
+# the file (so it's available if we need a terminal session)
+mv .bashrc bashrc-pre-conda
 conda init bash
 . .bashrc
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Environment sourced"
+echo "#"
+echo "######################################################"
+/bin/pwd
+type -a conda
+ls -lt | head
+cat .bashrc
+conda env list
+echo ""
 
-# We need ipywidgets for our notebook
-# (could be moved to requirements.txt, but want to keep that CLI only for now)
-conda activate kernel
-conda install -y -c conda-forge ipywidgets
 
-# We need to install the rest into the server's environment.
-conda activate notebook
-conda install -y -c conda-forge jupyter_contrib_nbextensions
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Install kernel"
+echo "#"
+echo "######################################################"
+echo ""
 
-### ones we need for sure
-##- "initialization cells" aka 'init_cell'
-jupyter nbextension enable init_cell/main
-jupyter nbextension enable collapsible_headings/main
-##
-### maybe add
-##- "Select CodeMirror Keymap" aka "select_keymap"
-##- "Tree Filter" aka "tree-filter"
-##- "Codefolding in Editor" aka "codefolding"
-##- "Collapsible Headings" aka "collapsible_headings"
-#jupyter labextension list --help-all
-#jupyter labextension enable init_cell
-##
-### debug help
-##- "Nbextensions edit menu item" aka "nbextensions_configurator"
-##- "contrib_nbextensions_help_item"
+# We need a specific set of packages for each environment, so
+# delete and recreate them
+conda activate base     # get to stable kernel
+conda env remove --name kernel
+conda env create --file conda/surface/kernel.yml
+
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Install Notebook"
+echo "#"
+echo "######################################################"
+echo ""
+conda env remove --name notebook
+conda env create --file conda/surface/notebook.yml
+
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  done"
+echo "#"
+echo "######################################################"
+echo ""
