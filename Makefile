@@ -1,7 +1,7 @@
 VENV_NAME:=venv
 github3_version:=1.1.1
 port := 10001
-image_to_use := dev
+image_to_use := offboard-py2
 
 DOCKER_OPTS :=
 
@@ -10,7 +10,7 @@ help:
 	@echo "Targets available"
 	@echo ""
 	@echo "    help          this message"
-	@echo "    dev           create a docker image based on working directory"
+	@echo "    build         create a docker image based on working directory"
 	@echo "    run-dev       run a docker image previously created"
 	@echo "    run-update    run with modifiable current directory"
 	@echo "    $(VENV_NAME)  create a local virtualenv for old style development"
@@ -22,8 +22,8 @@ $(VENV_NAME):
 	false
 
 SHELL := /bin/bash
-.PHONY: dev
-dev: jupyter-config
+.PHONY: build
+build: jupyter-config
 	-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \

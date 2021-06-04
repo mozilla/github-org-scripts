@@ -39,7 +39,7 @@ echo ""
 # delete and recreate them
 conda activate base     # get to stable kernel
 conda env remove --name kernel
-conda env create --file conda/surface/kernel.yml
+conda env create --file conda/kernel.yml
 
 echo ""
 echo "######################################################"
@@ -49,7 +49,17 @@ echo "#"
 echo "######################################################"
 echo ""
 conda env remove --name notebook
-conda env create --file conda/surface/notebook.yml
+conda env create --file conda/notebook.yml
+
+# Need additional configuration for the notebook
+conda activate notebook
+
+jupyter contrib nbextension install --user --symlink
+jupyter nbextensions_configurator enable --user
+jupyter nbextension enable init_cell/main --user
+jupyter nbextension enable collapsible_headings/main --user
+#jupyter labextension list --help-all
+jupyter labextension enable init_cell
 
 echo ""
 echo "######################################################"

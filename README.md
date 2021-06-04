@@ -3,7 +3,7 @@
 **NOTE: the main helper library, GitHub3.py, has been updated to version 1.1.0.
 Not all scripts have been verified against this version yet.**
 
-These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
+These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though. Many scripts support the `--help` option. That information should be more up to date than information in this document.
 
 ## Credentials
 
@@ -20,14 +20,17 @@ GITHUB_PAT=$(pass show myPAT) script args
 ```
 [pass]: https://www.passwordstore.org/
 
-## Docker Images
-
-These scripts currently still require python2. The recommended way to deal with
-this is by using docker. Given the complexities of setting up Jupyter to run in
-docker, a helper utility is use: `repo2docker`. The make targets assume that is
-installed. Use `pipx install repo2docker` to install.
-
 ## Jupyter Notebooks
+### Docker Images
+
+The Jupyter Notebooks currently still require python2. The recommended way to
+deal with this is by using docker. Given the complexities of setting up Jupyter
+to run in docker, a helper utility is use: `repo2docker`. The make targets
+assume that is installed. Use `pipx install jupyter-repo2docker` to install.
+
+The Makefile contains targets for building and running the docker images. Invoke
+`make` without arguments to see those targets
+
 ### User Search.ipynb
 Given a set of possible GitHub logins, determine if they might have any
 permissions in various organizations. Links are provided for hits, so easy to
@@ -37,6 +40,10 @@ N.B.: Both this script and the GitHub search interface make assumptions. It is
 *your* responsibility to ensure any possible match is a valid match.
 
 ## Scripts
+
+Scripts should now work with Python 3. Please open issues for any problems you
+encounter.
+
 ### auditlog.py
 Download audit log for $ORG via headless firefox via selenium
 ([``geckodriver``][gd_url] must be installed). Credentials as environment
@@ -81,12 +88,6 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
 
 ## BUGS
-
-* BUG: `postBuild` script not being run on image build
-   - symptom: no collapsable markdown heading
-   - symptom: no "Initialization Cell" checkbox on top right code cell frame
-   - workaround: after start container, get shell and manually run `postBuild` script
-      * must be done after every fresh image start
 
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2018 Fred Wenzel and others. For more information read the file ``LICENSE``.
