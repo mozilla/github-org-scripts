@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# There are two different environments we need to support:
+#   - kernel -- for anything needed by the notebook code itself (py2)
+#   - notebook -- for anything used by the Jupyter framework (py3)
+#
+
+# configure to allow conda from terminal (we don't have an interactive one
+# during docker image build, so don't have .bashrc)
+# 2021-05-24 - we now appear to have a .bashrc, which does an early exit
+# if the session is not interactive. We don't need much, so just rename
+# the file (so it's available if we need a terminal session)
+mv .bashrc bashrc-pre-conda
+conda init bash
+. .bashrc
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Environment sourced"
+echo "#"
+echo "######################################################"
+/bin/pwd
+type -a conda
+ls -lt | head
+cat .bashrc
+conda env list
+echo ""
+
+
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Install kernel"
+echo "#"
+echo "######################################################"
+echo ""
+
+# We need a specific set of packages for each environment, so
+# delete and recreate them
+conda activate base     # get to stable kernel
+conda env remove --name kernel
+conda env create --file conda/kernel.yml
+
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  Install Notebook"
+echo "#"
+echo "######################################################"
+echo ""
+conda env remove --name notebook
+conda env create --file conda/notebook.yml
+
+# Need additional configuration for the notebook
+conda activate notebook
+
+jupyter contrib nbextension install --user --symlink
+jupyter nbextensions_configurator enable --user
+jupyter nbextension enable init_cell/main --user
+jupyter nbextension enable collapsible_headings/main --user
+#jupyter labextension list --help-all
+jupyter labextension enable init_cell
+
+echo ""
+echo "######################################################"
+echo "#"
+echo "#  done"
+echo "#"
+echo "######################################################"
+echo ""

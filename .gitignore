@@ -5,3 +5,5 @@ cache/*\.json
 .venv
 # for jupyter notebooks
 .ipynb*
+# when directory mounted as writeable from docker
+.bash*

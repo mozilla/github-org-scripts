@@ -1,4 +1,3 @@
-
 from datetime import datetime
 import os
 import time
@@ -6,15 +5,15 @@ import time
 from github3 import login
 
 
-CREDENTIALS_FILE = '.credentials'
+CREDENTIALS_FILE = ".credentials"
 
 
 def get_token():
-    id = token = ''
+    token = ""
     token = os.environ.get("GITHUB_PAT", "")
     if not token:
-        with open(CREDENTIALS_FILE, 'r') as cf:
-            id = cf.readline().strip()
+        with open(CREDENTIALS_FILE) as cf:
+            _ = cf.readline().strip()
             token = cf.readline().strip()
     return token
 
@@ -28,8 +27,8 @@ def get_github3_client():
 def sleep_if_rate_limited(gh, verbose=False):
     rates = gh.rate_limit()
 
-    if not rates['resources']['search']['remaining']:
-        reset_epoch = rates['resources']['search']['reset']
+    if not rates["resources"]["search"]["remaining"]:
+        reset_epoch = rates["resources"]["search"]["reset"]
 
         reset_dt, now = datetime.utcfromtimestamp(reset_epoch), datetime.utcnow()
 
@@ -37,6 +36,11 @@ def sleep_if_rate_limited(gh, verbose=False):
             sleep_secs = (reset_dt - now).seconds + 1
 
             if verbose:
-                print('sleeping for', sleep_secs, 'got rate limit', rates['resources']['search'])
+                print(
+                    "sleeping for",
+                    sleep_secs,
+                    "got rate limit",
+                    rates["resources"]["search"],
+                )
 
             time.sleep(sleep_secs)
