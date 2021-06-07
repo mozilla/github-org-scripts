@@ -40,6 +40,8 @@ echo ""
 conda activate base     # get to stable kernel
 conda env remove --name kernel
 conda env create --file conda/kernel.yml
+# make sure the ipython kernel is installed for py2
+python2 -m ipykernel install --user
 
 echo ""
 echo "######################################################"
