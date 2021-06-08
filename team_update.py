@@ -118,7 +118,9 @@ def parse_args():
     parser.add_argument(
         "orgs",
         nargs="*",
-        default=["mozilla",],
+        default=[
+            "mozilla",
+        ],
         help="github organizations to check (defaults to mozilla)",
     )
     parser.add_argument(

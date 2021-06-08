@@ -16,7 +16,7 @@ help:
 	@echo "    $(VENV_NAME)  create a local virtualenv for old style development"
 
 $(VENV_NAME):
-	virtualenv --python=python2.7 $@
+	virtualenv --python=python3.7 $@
 	. $(VENV_NAME)/bin/activate && echo req*.txt | xargs -n1 pip install -r
 	@echo "Virtualenv created in $(VENV_NAME). You must activate before continuing."
 	false

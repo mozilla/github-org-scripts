@@ -7,6 +7,7 @@
 
 # configure to allow conda from terminal (we don't have an interactive one
 # during docker image build, so don't have .bashrc)
+
 # 2021-05-24 - we now appear to have a .bashrc, which does an early exit
 # if the session is not interactive. We don't need much, so just rename
 # the file (so it's available if we need a terminal session)
