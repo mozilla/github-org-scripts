@@ -4,6 +4,7 @@
 e.g. make a team of 'owners' or 'members'. The team must already exist -
 see --help output for names
 """
+
 import argparse
 import logging
 import sys
@@ -25,11 +26,21 @@ def team_name(user_type):
     return team_name
 
 
+def get_or_create_team(org, team_name):
+    try:
+        team = [x for x in org.teams() if x.name == team_name][0]
+    except IndexError:
+        # no such team
+        team = org.create_team(team_name)
+        logger.warn(f"created team {team_name} in {org.login}")
+    return team
+
+
 def update_team_membership(org, new_member_list, team_name=None, do_update=False):
     # we're using a team to communicate with these folks, update
     # that team to contain exactly new_member_list members
     # team must already exist in the org
-    team = [x for x in org.teams() if x.name == team_name][0]
+    team = get_or_create_team(org, team_name)
     # get set of current members
     current = {x.login for x in team.members()}
     # get set of new members
@@ -38,6 +49,10 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
     to_add = new - current
     no_change = new & current
     update_success = True
+    if VERBOSE:
+        print("%5d unchanged" % len(no_change))
+        for login in no_change:
+            print(f"    {login} is unchanged")
     print("%5d alumni" % len(to_remove))
     for login in to_remove:
         if do_update and not team.remove_member(login):
@@ -75,9 +90,10 @@ def update_team_membership(org, new_member_list, team_name=None, do_update=False
 
 def check_users(gh, org_name, admins_only=True, update_team=False):
 
-    org = gh.organization(org_name)
-    if not org:
-        print("No such org found!")
+    try:
+        org = gh.organization(org_name)
+    except github3.exceptions.NotFoundError:
+        print(f"Org '{org_name}' does not exist")
         sys.exit(1)
 
     role = "admin" if admins_only else "all"

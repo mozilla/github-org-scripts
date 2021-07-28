@@ -1,3 +1,4 @@
+PyYaml==5.1
 appnope==0.1.2; python_version >= "3.3" and sys_platform == "darwin" or platform_system == "Darwin" \
     --hash=sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442 \
     --hash=sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a
@@ -94,9 +95,7 @@ entrypoints==0.3 \
     --hash=sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19 \
     --hash=sha256:c70dd71abe5a8c85e55e12c19bd91ccfeec11a6e99044204511f9ed547d48451
 -e git+https://github.com/mozilla/github_selenium.git@30a6117ebbb5706be279b6ea3124c872a8d09ec5#egg=github-selenium
-github3.py==1.0.0a4 \
-    --hash=sha256:fd7008e18de68769fce6e069aeccf0a165953ace47d66b5fc0466bc59221264c \
-    --hash=sha256:570e776e2ab1318533b1555ee2f2f784142883b49cb4090582c0307c16cc1666
+github3.py==1.1.0
 idna==2.10 \
     --hash=sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0 \
     --hash=sha256:b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6

@@ -4,7 +4,7 @@ Current minimums: python 3.7; GitHub3.py 1.3.0
 
 ***Please use [poetry](https://pypi.org/project/poetry/) to manage virtual environments - `requirements.txt` may be out of date, and does not include development dependencies.***
 
-These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though.
+These are some API helper scripts for sanely managing a github org. For now this is somewhat hardcoded for the mozilla org; no need for it to remain that way though. Many scripts support the `--help` option. That information should be more up to date than information in this document.
 
 ## Credentials
 
@@ -19,6 +19,16 @@ GITHUB_TOKEN=$(pass show myPAT) script args
 [pass]: https://www.passwordstore.org/
 
 ## Jupyter Notebooks
+### Docker Images
+
+The Jupyter Notebooks currently still require python2. The recommended way to
+deal with this is by using docker. Given the complexities of setting up Jupyter
+to run in docker, a helper utility is use: `repo2docker`. The make targets
+assume that is installed. Use `pipx install jupyter-repo2docker` to install.
+
+The Makefile contains targets for building and running the docker images. Invoke
+`make` without arguments to see those targets
+
 ### User Search.ipynb
 Given a set of possible GitHub logins, determine if they might have any
 permissions in various organizations. Links are provided for hits, so easy to
@@ -28,6 +38,10 @@ N.B.: Both this script and the GitHub search interface make assumptions. It is
 *your* responsibility to ensure any possible match is a valid match.
 
 ## Scripts
+
+Scripts should now work with Python 3. Please open issues for any problems you
+encounter.
+
 ### auditlog.py
 Download audit log for $ORG via headless firefox via selenium
 ([``geckodriver``][gd_url] must be installed). Credentials as environment
@@ -63,6 +77,8 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 
 ### old_repos.py
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
+
+## BUGS
 
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2021 Fred Wenzel and others. For more information read the file ``LICENSE``.
