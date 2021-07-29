@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Support starting in sub-dir, to only display files in that sub-dir
+
+declare -r NOTEBOOK_DIR=notebooks
+
+if [[ -d ${NOTEBOOK_DIR} ]] ; then
+    cd ${NOTEBOOK_DIR} || true
+fi
+
+exec "$@"

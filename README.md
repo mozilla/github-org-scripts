@@ -29,13 +29,16 @@ assume that is installed. Use `pipx install jupyter-repo2docker` to install.
 The Makefile contains targets for building and running the docker images. Invoke
 `make` without arguments to see those targets
 
-### User Search.ipynb
-Given a set of possible GitHub logins, determine if they might have any
-permissions in various organizations. Links are provided for hits, so easy to
-examine more closely.
+When started, the docker container will serve notebooks from the `notebooks/`
+directory. Current notebooks include:
 
-N.B.: Both this script and the GitHub search interface make assumptions. It is
-*your* responsibility to ensure any possible match is a valid match.
+- **`User Search.ipynb`** --
+    Given a set of possible GitHub logins, determine if they might have any
+    permissions in various organizations. Links are provided for hits, so easy
+    to examine more closely.
+
+    N.B.: Both this script and the GitHub search interface make assumptions. It
+    is *your* responsibility to ensure any possible match is a valid match.
 
 ## Scripts
 

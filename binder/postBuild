@@ -25,6 +25,8 @@ type -a conda
 ls -lt | head
 cat .bashrc
 conda env list
+# show paths to help debug configs
+jupyter --paths
 echo ""
 
 
@@ -40,7 +42,9 @@ echo ""
 # delete and recreate them
 conda activate base     # get to stable kernel
 conda env remove --name kernel
-conda env create --file conda/kernel.yml
+conda env create --file binder/conda/kernel.yml
+# Need additional configuration for the kernel
+conda activate kernel
 # make sure the ipython kernel is installed for py2
 python2 -m ipykernel install --user
 
@@ -51,8 +55,9 @@ echo "#  Install Notebook"
 echo "#"
 echo "######################################################"
 echo ""
+conda activate base     # get to stable kernel
 conda env remove --name notebook
-conda env create --file conda/notebook.yml
+conda env create --file binder/conda/notebook.yml
 
 # Need additional configuration for the notebook
 conda activate notebook
@@ -62,7 +67,7 @@ jupyter nbextensions_configurator enable --user
 jupyter nbextension enable init_cell/main --user
 jupyter nbextension enable collapsible_headings/main --user
 #jupyter labextension list --help-all
-jupyter labextension enable init_cell
+#jupyter labextension enable init_cell
 
 echo ""
 echo "######################################################"

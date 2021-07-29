@@ -2,6 +2,7 @@ VENV_NAME:=venv
 github3_version:=1.1.1
 port := 10001
 image_to_use := offboard-py2
+container_user_name := ghjupyter
 
 DOCKER_OPTS :=
 
@@ -27,11 +28,14 @@ build: jupyter-config
 	-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \
+			--user-name $(container_user_name) \
 			--no-run \
 			. \
 		; \
 	'
 
+# For `run-dev`, we use the configs baked into the image at the time of
+# the build, so we get what we expect.
 .PHONY: run-dev
 run-dev:
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
@@ -51,8 +55,10 @@ run-dev:
 		wait $$job_pid ; \
 	) '
 
+# For `run-update`, we're mapping the current directory atop the home
+# directory
 .PHONY: run-update
-run-update: jupyter-config
+run-update:
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
@@ -63,7 +69,7 @@ run-update: jupyter-config
 			--env "CIS_CLIENT_ID" \
 			--env "CIS_CLIENT_SECRET" \
 			--publish $(port):8888 \
-			--volume "$$PWD:/home/$$USER" \
+			--volume "$$PWD/notebooks:/home/$(container_user_name)/notebooks" \
 			$(image_to_use):$(github3_version) \
 		& \
 		job_pid=$$! ; \
@@ -76,8 +82,14 @@ run-update: jupyter-config
 debug-update:
 	$(MAKE) DOCKER_OPTS="--security-opt=seccomp:unconfined" run-update
 
+# The jupyter config file is only needed during docker build, so
+# generate if needed. (Jupyter config files and mounting this dir as
+# $HOME mean, in general, we do not want any other Jupyter config files
+# commited. By generating this one on the fly, we can put `.jupyter` in
+# `.gitignore`.)
 jupyter-config: .jupyter/jupyter_notebook_config.py
 .jupyter/jupyter_notebook_config.py:
+	-mkdir -p $$(dirname $@)
 	echo -e >$@ \
 "# disable browser launch (it's in a container)\n"\
 "c.NotebookApp.open_browser = False\n"\

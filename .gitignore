@@ -1,11 +1,12 @@
 *\.py[oc]
 \.credentials
 cache/*\.json
+.cache
 # for poetry
 .venv
 # for jupyter notebooks
 .ipynb*
-.jupyter
+.jupyter*
 
 # for databases created by get_active_hooks
 *\.db
