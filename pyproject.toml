@@ -15,7 +15,10 @@ arrow = "^0.12.1"
 jupyter = "^1.0.0"
 argcomplete = "^1.12.3"
 "github3.py" = "<2.0.0"
+jupyter_nbextensions_configurator = "^0.4.1"
+jupyter-contrib-nbextensions = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
 jupyterlab = "^3.0.14"
+jupytext = "^1.11.4"
