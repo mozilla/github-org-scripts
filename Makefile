@@ -14,6 +14,7 @@ help:
 	@echo "    build         create a docker image based on working directory"
 	@echo "    run-dev       run a docker image previously created"
 	@echo "    run-update    run with modifiable current directory"
+	@echo "    jupyter 	 run local (non docker) jupyter server for development"
 	@echo "    $(VENV_NAME)  create a local virtualenv for old style development"
 
 $(VENV_NAME):
@@ -76,6 +77,15 @@ run-update:
 		sleep 5 ; \
 		docker ps --filter "ancestor=$(image_to_use):$(github3_version)" ; \
 		wait $$job_pid ; \
+	) '
+
+.PHONY: jupyter
+jupyter: jupyter-config
+	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
+		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
+		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
+		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
+		jupyter-notebook ; \
 	) '
 
 .PHONY: debug-update
