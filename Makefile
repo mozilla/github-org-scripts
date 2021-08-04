@@ -1,7 +1,7 @@
 VENV_NAME:=venv
-github3_version:=1.1.1
+github3_version:=1.1.0
 port := 10001
-image_to_use := offboard-py2
+image_to_use := offboard-py3
 container_user_name := ghjupyter
 
 DOCKER_OPTS :=
@@ -25,13 +25,17 @@ $(VENV_NAME):
 
 SHELL := /bin/bash
 .PHONY: build
-build: jupyter-config
+# we use a file url to avoid including work files in the production
+# image. During development, you may prefer a bare dot "." to pick up
+# local changes, and remove the `--ref ` option
+build:
 	-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \
 			--user-name $(container_user_name) \
 			--no-run \
-			. \
+			--ref $$(git show-ref --verify --hash --head HEAD) \
+			file://$$PWD/.git \
 		; \
 	'
 
@@ -80,7 +84,7 @@ run-update:
 	) '
 
 .PHONY: jupyter
-jupyter: jupyter-config
+jupyter:
 	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
 		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
@@ -92,22 +96,5 @@ jupyter: jupyter-config
 debug-update:
 	$(MAKE) DOCKER_OPTS="--security-opt=seccomp:unconfined" run-update
 
-# The jupyter config file is only needed during docker build, so
-# generate if needed. (Jupyter config files and mounting this dir as
-# $HOME mean, in general, we do not want any other Jupyter config files
-# commited. By generating this one on the fly, we can put `.jupyter` in
-# `.gitignore`.)
-jupyter-config: .jupyter/jupyter_notebook_config.py
-.jupyter/jupyter_notebook_config.py:
-	-mkdir -p $$(dirname $@)
-	echo -e >$@ \
-"# disable browser launch (it's in a container)\n"\
-"c.NotebookApp.open_browser = False\n"\
-"# Set connection string\n"\
-"c.NotebookApp.portInt = $(port)\n"\
-"c.NotebookApp.custom_display_url = 'http://localhost:$(port)'\n"\
-"# disable security locally\n"\
-"c.NotebookApp.token = ''\n"\
-"c.NotebookApp.password = ''"
 
 # vim: noet ts=8

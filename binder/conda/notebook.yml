@@ -118,4 +118,6 @@ dependencies:
   - zeromq=4.3.2=he1b5a44_2
   - zipp=2.1.0=py_0
   - zlib=1.2.11=h516909a_1006
+  - pip:
+    - github3.py==1.1.0
 prefix: /srv/conda/envs/notebook

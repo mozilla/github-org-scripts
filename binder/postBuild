@@ -33,24 +33,6 @@ echo ""
 echo ""
 echo "######################################################"
 echo "#"
-echo "#  Install kernel"
-echo "#"
-echo "######################################################"
-echo ""
-
-# We need a specific set of packages for each environment, so
-# delete and recreate them
-conda activate base     # get to stable kernel
-conda env remove --name kernel
-conda env create --file binder/conda/kernel.yml
-# Need additional configuration for the kernel
-conda activate kernel
-# make sure the ipython kernel is installed for py2
-python2 -m ipykernel install --user
-
-echo ""
-echo "######################################################"
-echo "#"
 echo "#  Install Notebook"
 echo "#"
 echo "######################################################"
@@ -62,12 +44,15 @@ conda env create --file binder/conda/notebook.yml
 # Need additional configuration for the notebook
 conda activate notebook
 
+# trust the notebooks we ship
+echo "pwd $PWD"
+echo "ls: $(ls -ld notebooks/*.ipynb)"
+jupyter trust notebooks/*.ipynb
+
 jupyter contrib nbextension install --user --symlink
 jupyter nbextensions_configurator enable --user
 jupyter nbextension enable init_cell/main --user
 jupyter nbextension enable collapsible_headings/main --user
-#jupyter labextension list --help-all
-#jupyter labextension enable init_cell
 
 echo ""
 echo "######################################################"
