@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 """Report Basic info about orgs."""
 
@@ -123,7 +123,7 @@ class MyOrganizationsIterator(github3.structs.GitHubIterator):
         super().__init__(
             count=-1,  # get all
             url=me.session.base_url + "/user/orgs",
-            cls=github3.orgs.Organization,
+            cls=github3.orgs.ShortOrganization,
             session=me.session,
         )
 
@@ -184,13 +184,12 @@ def main():
                 if args.names_only:
                     print("\n".join(sorted(args.orgs)))
                     return
-            else:
-                newline = ""
-                for org in args.orgs:
-                    if len(args.orgs) > 1 and not args.json:
-                        print(f"{newline}Processing org {org}")
-                        newline = "\n"
-                    show_info(gh, org, args.owners, args.email, args.json)
+            newline = ""
+            for org in args.orgs:
+                if len(args.orgs) > 1 and not args.json:
+                    print(f"{newline}Processing org {org}")
+                    newline = "\n"
+                show_info(gh, org, args.owners, args.email, args.json)
         except github3.exceptions.ForbiddenError as e:
             print_limits(e)
 
