@@ -21,10 +21,11 @@ GITHUB_TOKEN=$(pass show myPAT) script args
 ## Jupyter Notebooks
 ### Docker Images
 
-The Jupyter Notebooks currently still require python2. The recommended way to
-deal with this is by using docker. Given the complexities of setting up Jupyter
+The Jupyter Notebooks has a complex environment as regards dependencies. The recommended way to
+deal with this is by using a docker container. Given the complexities of setting up Jupyter
 to run in docker, a helper utility is use: `repo2docker`. The make targets
 assume that is installed. Use `pipx install jupyter-repo2docker` to install.
+_(See `README.md` files in the `binder/` directory tree for more info on building the image)_
 
 The Makefile contains targets for building and running the docker images. Invoke
 `make` without arguments to see those targets
@@ -82,6 +83,8 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
 
 ## BUGS
+
+- Some of these scripts are no longer relevent.
 
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2021 Fred Wenzel and others. For more information read the file ``LICENSE``.

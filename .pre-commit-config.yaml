@@ -29,8 +29,8 @@ repos:
   rev: 2.1.5  # or specific git tag
   hooks:
     - id: forbid-binary
-    - id: markdownlint # Configure in .mdlrc
-      exclude: ^(CODE_OF_CONDUCT.md|README.md)$
+      #    - id: markdownlint # Configure in .mdlrc
+      #      exclude: ^(CODE_OF_CONDUCT.md|README.md)$
     - id: shellcheck
 
 - repo: https://github.com/IamTheFij/docker-pre-commit

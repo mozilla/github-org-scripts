@@ -119,5 +119,7 @@ dependencies:
   - zipp=2.1.0=py_0
   - zlib=1.2.11=h516909a_1006
   - pip:
-    - github3.py==1.1.0
+    - argcomplete==1.12.3
+    - github3-py==1.1.0
+    - uritemplate==3.0.1
 prefix: /srv/conda/envs/notebook
