@@ -3,6 +3,7 @@ github3_version:=1.1.0
 port := 10001
 image_to_use := offboard-py3
 container_user_name := ghjupyter
+SOPS_credentials := $(SECOPS_SOPS_PATH)/off-boarding.yaml
 
 DOCKER_OPTS :=
 
@@ -43,10 +44,11 @@ build:
 # the build, so we get what we expect.
 .PHONY: run-dev
 run-dev:
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
+	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
+	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
-		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
+		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
+		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
