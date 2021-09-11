@@ -66,10 +66,11 @@ run-dev:
 # directory
 .PHONY: run-update
 run-update:
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
+	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
+	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
-		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
+		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
+		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
@@ -87,10 +88,11 @@ run-update:
 
 .PHONY: jupyter
 jupyter:
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(pass show Mozilla/moz-hwine-PAT) ; \
+	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
+	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
 		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(pass show Mozilla/person_api_client_id 2>/dev/null) ; \
-		export CIS_CLIENT_SECRET=$$(pass show Mozilla/person_api_client_secret 2>/dev/null) ; \
+		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
+		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
 		jupyter-notebook ; \
 	) '
 
