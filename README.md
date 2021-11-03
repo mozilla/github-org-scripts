@@ -46,6 +46,8 @@ directory. Current notebooks include:
     N.B.: Both this script and the GitHub search interface make assumptions. It
     is *your* responsibility to ensure any possible match is a valid match.
 
+    There is now a section which will search for usernames in any non-documentation source file. The intent is to spot cases where app, login, or other permissions may have been granted via that file. Since such authorization usage is adhoc, there are likely to be many false positives. (However teams may choose to use the list for "cleanup" of unmaintained documents.) Typically, the user will want to supply both ldap and GitHub logins to be the search targets.
+
 ## Scripts
 
 Scripts should now work with Python 3. Please open issues for any problems you
@@ -65,11 +67,6 @@ Find all hooks configured for an organization -- see --help for details
 ### get_org_info.py
 Output basic info about an org, more if you have permissions. See --help for details
 
-### lfs.py
-Get current LFS Billing values using a headless firefox via selenium
-(``geckodriver`` must be installed). Credentials as environment
-variables, and 2FA token passed as input.
-
 ### manage_invitations.py
 Cancel all org & repository invitations older than a specified age (default 2
 weeks). See --help for details.
@@ -77,9 +74,6 @@ weeks). See --help for details.
 ### team_update.py
 Update administrative teams so they can be used for the new GitHub discussion
 feature. Use the ``--help`` option for more information.
-
-### Audit logs
-Sadly, the org audit log does not have an API, so we'll screen scrape a little.
 
 #### hooks.py
 Analyzes a list of audit log export files (from the JS script) for hook/service creation/deletion and provides a summary. Use it to show commonly used apps/services/webhooks across the org.
