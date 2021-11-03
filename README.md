@@ -21,13 +21,19 @@ GITHUB_TOKEN=$(pass show myPAT) script args
 ## Jupyter Notebooks
 ### Docker Images
 
-The Jupyter Notebooks currently still require python2. The recommended way to
-deal with this is by using docker. Given the complexities of setting up Jupyter
+The Jupyter Notebooks has a complex environment as regards dependencies. The recommended way to
+deal with this is by using a docker container. Given the complexities of setting up Jupyter
 to run in docker, a helper utility is use: `repo2docker`. The make targets
 assume that is installed. Use `pipx install jupyter-repo2docker` to install.
+_(See `README.md` files in the `binder/` directory tree for more info on building the image)_
 
 The Makefile contains targets for building and running the docker images. Invoke
 `make` without arguments to see those targets
+
+- **NOTE**: the docker image only accepts credentials via [sops][sops]. The
+  environment variable "`SECOPS_SOPS_PATH`" must be set appropriately.
+
+[sops]: https://github.com/mozilla/sops
 
 When started, the docker container will serve notebooks from the `notebooks/`
 directory. Current notebooks include:
@@ -39,6 +45,8 @@ directory. Current notebooks include:
 
     N.B.: Both this script and the GitHub search interface make assumptions. It
     is *your* responsibility to ensure any possible match is a valid match.
+
+    There is now a section which will search for usernames in any non-documentation source file. The intent is to spot cases where app, login, or other permissions may have been granted via that file. Since such authorization usage is adhoc, there are likely to be many false positives. (However teams may choose to use the list for "cleanup" of unmaintained documents.) Typically, the user will want to supply both ldap and GitHub logins to be the search targets.
 
 ## Scripts
 
@@ -59,11 +67,6 @@ Find all hooks configured for an organization -- see --help for details
 ### get_org_info.py
 Output basic info about an org, more if you have permissions. See --help for details
 
-### lfs.py
-Get current LFS Billing values using a headless firefox via selenium
-(``geckodriver`` must be installed). Credentials as environment
-variables, and 2FA token passed as input.
-
 ### manage_invitations.py
 Cancel all org & repository invitations older than a specified age (default 2
 weeks). See --help for details.
@@ -72,9 +75,6 @@ weeks). See --help for details.
 Update administrative teams so they can be used for the new GitHub discussion
 feature. Use the ``--help`` option for more information.
 
-### Audit logs
-Sadly, the org audit log does not have an API, so we'll screen scrape a little.
-
 #### hooks.py
 Analyzes a list of audit log export files (from the JS script) for hook/service creation/deletion and provides a summary. Use it to show commonly used apps/services/webhooks across the org.
 
@@ -82,6 +82,8 @@ Analyzes a list of audit log export files (from the JS script) for hook/service 
 Generate a list of empty (should be deleted) repositories as well as untouched repos (might need to be archived).
 
 ## BUGS
+
+- Some of these scripts are no longer relevent.
 
 ## License
 This code is free software and licensed under an MPL-2.0 license. &copy; 2015-2021 Fred Wenzel and others. For more information read the file ``LICENSE``.

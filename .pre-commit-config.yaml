@@ -29,8 +29,8 @@ repos:
   rev: 2.1.5  # or specific git tag
   hooks:
     - id: forbid-binary
-    - id: markdownlint # Configure in .mdlrc
-      exclude: ^(CODE_OF_CONDUCT.md|README.md)$
+      #    - id: markdownlint # Configure in .mdlrc
+      #      exclude: ^(CODE_OF_CONDUCT.md|README.md)$
     - id: shellcheck
 
 - repo: https://github.com/IamTheFij/docker-pre-commit
@@ -54,6 +54,7 @@ repos:
   rev: 1.0.0  # Set to the most recent version
   hooks:
   - id: nb-ensure-clean
+    language_version: python3.6
     #args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
 
 - repo: https://github.com/Yelp/detect-secrets
