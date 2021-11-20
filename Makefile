@@ -13,8 +13,8 @@ help:
 	@echo ""
 	@echo "    help          this message"
 	@echo "    build         create a docker image based on working directory"
-	@echo "    run-dev       run a docker image previously created"
-	@echo "    run-update    run with modifiable current directory"
+	@echo "    run           run a docker image previously created"
+	@echo "    run-edit      run with modifiable current directory"
 	@echo "    jupyter 	 run local (non docker) jupyter server for development"
 	@echo "    $(VENV_NAME)  create a local virtualenv for old style development"
 
@@ -40,15 +40,11 @@ build:
 		; \
 	'
 
-# For `run-dev`, we use the configs baked into the image at the time of
+# For `run`, we use the configs baked into the image at the time of
 # the build, so we get what we expect.
-.PHONY: run-dev
-run-dev:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+.PHONY: run
+run:
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
@@ -62,15 +58,11 @@ run-dev:
 		wait $$job_pid ; \
 	) '
 
-# For `run-update`, we're mapping the current directory atop the home
+# For `run-edit`, we're mapping the current directory atop the home
 # directory
-.PHONY: run-update
-run-update:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+.PHONY: run-edit
+run-edit:
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
@@ -88,17 +80,13 @@ run-update:
 
 .PHONY: jupyter
 jupyter:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		jupyter-notebook ; \
 	) '
 
-.PHONY: debug-update
-debug-update:
-	$(MAKE) DOCKER_OPTS="--security-opt=seccomp:unconfined" run-update
+.PHONY: debug-edit
+debug-edit:
+	$(MAKE) DOCKER_OPTS="--security-opt=seccomp:unconfined" run-edit
 
 
 # vim: noet ts=8
