@@ -32,6 +32,10 @@ repos:
       #    - id: markdownlint # Configure in .mdlrc
       #      exclude: ^(CODE_OF_CONDUCT.md|README.md)$
     - id: shellcheck
+      args: [
+        "-e", "SC2128",  # allow non-index on array (yields first element)
+        "-e", "SC2155",  # allow declare & assign
+      ]
 
 - repo: https://github.com/IamTheFij/docker-pre-commit
   rev: v2.0.0

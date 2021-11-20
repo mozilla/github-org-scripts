@@ -44,11 +44,7 @@ build:
 # the build, so we get what we expect.
 .PHONY: run-dev
 run-dev:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
@@ -66,11 +62,7 @@ run-dev:
 # directory
 .PHONY: run-update
 run-update:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
@@ -88,11 +80,7 @@ run-update:
 
 .PHONY: jupyter
 jupyter:
-	$(SHELL) -c ' test -s "$(SECOPS_SOPS_PATH)" -a -d "$(SECOPS_SOPS_PATH)" || { echo "SECOPS_SOPS_PATH must be set"; exit 3; }'
-	$(SHELL) -c ' ( export GITHUB_PAT=$$(sops -d --extract "[\"GitHub creds\"][\"token\"]" $(SOPS_credentials)) ; \
-		[[ -z $$GITHUB_PAT ]] && exit 3 ; \
-		export CIS_CLIENT_ID=$$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" $(SOPS_credentials)) ; \
-		export CIS_CLIENT_SECRET=$$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" $(SOPS_credentials)) ; \
+	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		jupyter-notebook ; \
 	) '
 
