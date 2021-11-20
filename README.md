@@ -30,8 +30,8 @@ _(See `README.md` files in the `binder/` directory tree for more info on buildin
 The Makefile contains targets for building and running the docker images. Invoke
 `make` without arguments to see those targets
 
-- **NOTE**: the docker image only accepts credentials via [sops][sops]. The
-  environment variable "`SECOPS_SOPS_PATH`" must be set appropriately.
+- **NOTE**: the docker image allows credentials to be supplied via [sops][sops].
+  The environment variable "`SECOPS_SOPS_PATH`" must be set appropriately.
 
 [sops]: https://github.com/mozilla/sops
 
