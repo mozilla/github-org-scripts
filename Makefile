@@ -44,7 +44,7 @@ build:
 # the build, so we get what we expect.
 .PHONY: run
 run:
-	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+	$(SHELL) -ce ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
@@ -62,7 +62,7 @@ run:
 # directory
 .PHONY: run-edit
 run-edit:
-	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+	$(SHELL) -ce ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
@@ -80,7 +80,7 @@ run-edit:
 
 .PHONY: jupyter
 jupyter:
-	$(SHELL) -c ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+	$(SHELL) -ce ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
 		jupyter-notebook ; \
 	) '
 
