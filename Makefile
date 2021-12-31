@@ -30,7 +30,8 @@ SHELL := /bin/bash
 # image. During development, you may prefer a bare dot "." to pick up
 # local changes, and remove the `--ref ` option
 build:
-	-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
+	#-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
+	-docker tag $(image_to_use):$(github3_version) $(image_to_use):$(github3_version)-previous 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \
 			--user-name $(container_user_name) \
