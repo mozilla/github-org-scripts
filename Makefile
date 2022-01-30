@@ -30,7 +30,6 @@ SHELL := /bin/bash
 # image. During development, you may prefer a bare dot "." to pick up
 # local changes, and remove the `--ref ` option
 build:
-	#-docker rmi $(image_to_use):$(github3_version) 2>/dev/null
 	-docker tag $(image_to_use):$(github3_version) $(image_to_use):$(github3_version)-previous 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \
@@ -46,10 +45,12 @@ build:
 .PHONY: run
 run:
 	$(SHELL) -ce ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+		export TZ=$$(./get_olson_tz.sh) ; \
 		docker run --rm --publish-all \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
 			--env "CIS_CLIENT_SECRET" \
+			--env "TZ" \
 			--publish $(port):8888 \
 			$(image_to_use):$(github3_version) \
 		& \
@@ -64,11 +65,13 @@ run:
 .PHONY: run-edit
 run-edit:
 	$(SHELL) -ce ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+		export TZ=$$(./get_olson_tz.sh) ; \
 		docker run --rm --publish-all \
 			$(DOCKER_OPTS) \
 			--env "GITHUB_PAT" \
 			--env "CIS_CLIENT_ID" \
 			--env "CIS_CLIENT_SECRET" \
+			--env "TZ" \
 			--publish $(port):8888 \
 			--volume "$$PWD/notebooks:/home/$(container_user_name)/notebooks" \
 			$(image_to_use):$(github3_version) \
