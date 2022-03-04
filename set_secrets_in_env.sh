@@ -17,8 +17,11 @@ fi
 #   2. SECOPS_SOPS_PATH is supplied & valid, and all 3 credentials are empty
 #      In this case, the relative path to the actual credentials file must be
 #      passed as the first arguement
+#   3. if --develop is passed, just set vars with bogus values
 
-if [[ -n $GITHUB_PAT && -n $CIS_CLIENT_ID && -n $CIS_CLIENT_SECRET \
+if [[ "$1" == "--develop" ]]; then
+        export GITHUB_PAT=developj CIS_CLIENT_ID=developj CIS_CLIENT_SECRET=developj
+elif [[ -n $GITHUB_PAT && -n $CIS_CLIENT_ID && -n $CIS_CLIENT_SECRET \
     && -z $SECOPS_SOPS_PATH ]]; then
     # nothing to do
     :

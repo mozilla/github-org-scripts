@@ -1,8 +1,10 @@
 VENV_NAME:=venv
-github3_version:=1.1.0
+gitrev := $(shell git rev-parse --short=10 HEAD)
+now := $(shell date --utc +%Y%m%dT%H%MZ)
+github3_version:=1.1.0-$(now)-$(gitrev)
 port := 10001
-image_to_use := offboard-py3
-container_user_name := ghjupyter
+image_to_use := offboard-slim
+container_user_name := jovyan
 SOPS_credentials := $(SECOPS_SOPS_PATH)/off-boarding.yaml
 
 DOCKER_OPTS :=
@@ -25,11 +27,18 @@ $(VENV_NAME):
 	false
 
 SHELL := /bin/bash
-.PHONY: build
+.PHONY: build debug_build
+# New build
+build:
+	docker build --tag $(image_to_use):$(github3_version) --tag $(image_to_use):latest .
+# debug the build by not using buildkit - we also assume last one failed, so no need to tag prior
+debug_build:
+	DOCKER_BUILDKIT=0 docker build --tag $(image_to_use):debug .
+.PHONY: build-old
 # we use a file url to avoid including work files in the production
 # image. During development, you may prefer a bare dot "." to pick up
-# local changes, and remove the `--ref ` option
-build:
+# local changes, and removethe `--ref ` option
+build-old:
 	-docker tag $(image_to_use):$(github3_version) $(image_to_use):$(github3_version)-previous 2>/dev/null
 	$(SHELL) -c '  \
 		repo2docker --image-name "$(image_to_use):$(github3_version)" \
@@ -51,12 +60,13 @@ run:
 			--env "CIS_CLIENT_ID" \
 			--env "CIS_CLIENT_SECRET" \
 			--env "TZ" \
+			--env "DOCKER_STACKS_JUPYTER_CMD=notebook" \
 			--publish $(port):8888 \
-			$(image_to_use):$(github3_version) \
+			$(image_to_use):latest \
 		& \
 		job_pid=$$! ; \
 		sleep 5 ; \
-		docker ps --filter "ancestor=$(image_to_use):$(github3_version)" ; \
+		docker ps --filter "ancestor=$(image_to_use)" ; \
 		wait $$job_pid ; \
 	) '
 
