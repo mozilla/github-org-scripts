@@ -13,13 +13,13 @@
   repository: gecko-dev
   close: True
   lock: True
-  message: (Automated Close) Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+  message: (Automated Close) Please do not file PRs here, see https://firefox-source-docs.mozilla.org/contributing/how_to_submit_a_patch.html
 
 - organization: mozilla
   repository: gecko-projects
   close: True
   lock: True
-  message: (Automated Close) Please do not file PRs here, see https://developer.mozilla.org/docs/Mozilla/Developer_guide/How_to_Submit_a_Patch
+  message: (Automated Close) Please do not file PRs here, see https://firefox-source-docs.mozilla.org/contributing/how_to_submit_a_patch.html
 
 - organization: mozilla
   repository: build-mozharness
