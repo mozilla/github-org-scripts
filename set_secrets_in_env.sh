@@ -18,8 +18,11 @@ fi
 #      In this case, the relative path to the actual credentials file must be
 #      passed as the first arguement
 #   3. if --develop is passed, just set vars with bogus values
+#   4. if --unset is passed, clear the vars
 
-if [[ "$1" == "--develop" ]]; then
+if [[ "$1" == "--unset" ]]; then
+        unset GITHUB_PAT CIS_CLIENT_ID CIS_CLIENT_SECRET SECOPS_SOPS_PATH
+elif [[ "$1" == "--develop" ]]; then
         export GITHUB_PAT=developj CIS_CLIENT_ID=developj CIS_CLIENT_SECRET=developj
 elif [[ -n $GITHUB_PAT && -n $CIS_CLIENT_ID && -n $CIS_CLIENT_SECRET \
     && -z $SECOPS_SOPS_PATH ]]; then

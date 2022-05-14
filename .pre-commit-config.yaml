@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.2.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -15,18 +15,18 @@ repos:
     -   id: check-toml
 
 -   repo: https://github.com/psf/black
-    rev: 21.4b2
+    rev: 22.3.0
     hooks:
     -   id: black
 
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v2.14.0
+    rev: v2.32.1
     hooks:
     -   id: pyupgrade
         args: ["--py37-plus"]
 
 - repo: https://github.com/jumanjihouse/pre-commit-hooks
-  rev: 2.1.5  # or specific git tag
+  rev: 2.1.6  # or specific git tag
   hooks:
     - id: forbid-binary
       #    - id: markdownlint # Configure in .mdlrc
@@ -38,13 +38,17 @@ repos:
       ]
 
 - repo: https://github.com/IamTheFij/docker-pre-commit
-  rev: v2.0.0
+  rev: v2.1.0
   hooks:
         - id: docker-compose-check
-        - id: hadolint
+
+- repo: https://github.com/hadolint/hadolint
+  rev: v2.10.0
+  hooks:
+    - id: hadolint
 
 - repo: https://github.com/PyCQA/bandit
-  rev: 1.7.0
+  rev: 1.7.4
   hooks:
     - id: bandit
 
@@ -62,7 +66,7 @@ repos:
     #args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
 
 - repo: https://github.com/Yelp/detect-secrets
-  rev: v1.1.0
+  rev: v1.2.0
   hooks:
     - id: detect-secrets
       args: ['--baseline', '.secrets.baseline']
