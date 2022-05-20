@@ -12,7 +12,7 @@ Supplying credentials for execution is done by passing a PAT token as the value
 of the environment variable `GITHUB_TOKEN` (preferred) or `GITHUB_PAT`.
 
 The recommended way to set `GITHUB_TOKEN` is via cli access to your password
-manager. For example, using [pass][pass]:
+manager. For example, using [pass]:
 ```bash
 GITHUB_TOKEN=$(pass show myPAT) script args
 ```
@@ -21,22 +21,19 @@ GITHUB_TOKEN=$(pass show myPAT) script args
 ## Jupyter Notebooks
 ### Docker Images
 
-The Jupyter Notebooks has a complex environment as regards dependencies. The recommended way to
-deal with this is by using a docker container. Given the complexities of setting up Jupyter
-to run in docker, a helper utility is use: `repo2docker`. The make targets
-assume that is installed. Use `pipx install jupyter-repo2docker` to install.
-_(See `README.md` files in the `binder/` directory tree for more info on building the image)_
+Our Jupyter Notebooks have a farely simple environment as regards dependencies. The recommended way to
+deal with this is by using a docker container.
 
 The Makefile contains targets for building and running the docker images. Invoke
 `make` without arguments to see those targets
 
-- **NOTE**: the docker image allows credentials to be supplied via [sops][sops].
+- **NOTE**: the docker image allows credentials to be supplied via [sops].
   The environment variable "`SECOPS_SOPS_PATH`" must be set appropriately.
 
 [sops]: https://github.com/mozilla/sops
 
 When started, the docker container will serve notebooks from the `notebooks/`
-directory. Current notebooks include:
+directory, but they will be available at the top level. Current notebooks include:
 
 - **`User Search.ipynb`** --
     Given a set of possible GitHub logins, determine if they might have any
@@ -55,7 +52,7 @@ encounter.
 
 ### auditlog.py
 Download audit log for $ORG via headless firefox via selenium
-([``geckodriver``][gd_url] must be installed). Credentials as environment
+([`geckodriver`][gd_url] must be installed). Credentials as environment
 variables, and 2FA token passed as input when requested.
 
 ### contributing.py
