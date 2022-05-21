@@ -17,8 +17,8 @@ help:
 	@echo "    build         create a docker image based on working directory"
 	@echo "    run           run a docker image previously created"
 	@echo "    run-edit      run with modifiable current directory"
-	@echo "    jupyter       run local (non docker) jupyter server for development"
-	@echo "    $(VENV_NAME)          create a local virtualenv for old style development"
+	@echo "    jupyter       run local (non docker) jupyter server for development (deprecated)"
+	@echo "    $(VENV_NAME)  create a local virtualenv for old style development (deprecated)"
 
 $(VENV_NAME):
 	python3 -m venv $@
