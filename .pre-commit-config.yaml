@@ -58,12 +58,12 @@ repos:
     - id: docformatter
       args: [--in-place]
 
-- repo: https://gitlab.com/iamlikeme/nbhooks
-  rev: 1.0.0  # Set to the most recent version
-  hooks:
-  - id: nb-ensure-clean
-    #language_version: python3.6
-    #args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
+        ####- repo: https://gitlab.com/iamlikeme/nbhooks
+        ####  rev: 1.0.0  # Set to the most recent version
+        ####  hooks:
+        ####  - id: nb-ensure-clean
+        ####    language_version: python3.6
+        ####    #args: [--meta, ExecuteTime]  # Optional blacklist of metadata keys (you can use regex)
 
 - repo: https://github.com/Yelp/detect-secrets
   rev: v1.2.0
