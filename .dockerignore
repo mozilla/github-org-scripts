@@ -1,3 +1,5 @@
 *
 !requirement*txt
 !notebooks/
+# for debug
+!sudo-all
