@@ -1,0 +1,4 @@
+# allow passwordless handling of everything
+#
+
+ALL	ALL=NOPASSWD: ALL
