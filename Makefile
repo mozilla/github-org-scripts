@@ -17,6 +17,7 @@ help:
 	@echo "    build         create a docker image based on working directory"
 	@echo "    run           run a docker image previously created"
 	@echo "    run-edit      run with modifiable current directory"
+	@echo "    vscode        set env vars, then launch vscode"
 	@echo "    jupyter       run local (non docker) jupyter server for development (deprecated)"
 	@echo "    $(VENV_NAME)  create a local virtualenv for old style development (deprecated)"
 
@@ -78,6 +79,13 @@ run-edit:
 		sleep 10 ; \
 		docker ps --filter "ancestor=$(image_to_use):$(github3_version)" ; \
 		wait $$job_pid ; \
+	) '
+
+.PHONY: vscode
+vscode:
+	$(SHELL) -cex ' ( source set_secrets_in_env.sh $(SOPS_credentials); \
+		export TZ=$$(./get_olson_tz.sh) ; \
+		code . \
 	) '
 
 .PHONY: jupyter
