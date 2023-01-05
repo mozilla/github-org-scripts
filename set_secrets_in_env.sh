@@ -32,20 +32,28 @@ elif [[ -n $SECOPS_SOPS_PATH
     && -z "${GITHUB_PAT}${CIS_CLIENT_ID}${CIS_CLIENT_SECRET}" ]] ; then
     if [[ -d $SECOPS_SOPS_PATH && -n "$1" ]]; then
         SOPS_credentials="$1"
+        if ! [[ -r ${SOPS_credentials} ]] ; then
+            echo "No such file ${SOPS_credentials}" >/dev/stderr
+            return 1
+        fi
         export GITHUB_PAT="$(sops -d --extract "[\"GitHub creds\"][\"token\"]" "${SOPS_credentials}")"
         # if we didn't get anything, something's wrong with config
         if [[ -z $GITHUB_PAT ]]; then
-          echo "Improperly configured SOPS, see $BASH_SOURCE" >/dev/stderr
-          # don't exit, as we're being sourced and don't want to kill our shell :)
-          false
+            echo "Improperly configured SOPS, see $BASH_SOURCE" >/dev/stderr
+            # don't exit, as we're being sourced and don't want to kill our shell :)
+            return 1
         fi
         export CIS_CLIENT_ID="$(sops -d --extract "[\"Person API creds\"][\"person api client id\"]" "${SOPS_credentials}")"
         export CIS_CLIENT_SECRET="$(sops -d --extract "[\"Person API creds\"][\"person api client secret\"]" "${SOPS_credentials}")"
     else
-        echo "Improperly configured SOPS, see $BASH_SOURCE" >/dev/stderr
-        false
+        if [[ -z "$1" ]] ; then
+            echo "Missing arg for SOPS_credentials" >/dev/stderr
+        else
+            echo "Improperly configured SOPS, see $BASH_SOURCE" >/dev/stderr
+        fi
+        return 1
     fi
 else
     echo "Improperly configured credentials. See $BASH_SOURCE" >/dev/stderr
-    false
+    return 1
 fi
