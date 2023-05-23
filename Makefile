@@ -31,7 +31,7 @@ SHELL := /bin/bash
 .PHONY: build debug_build
 # New build
 build: Dockerfile .dockerignore Makefile notebooks/*ipynb requirements*.txt
-	docker build --tag $(image_to_use):$(github3_version) --tag $(image_to_use):latest .
+	docker buildx build --tag $(image_to_use):$(github3_version) --tag $(image_to_use):latest .
 # debug the build by not using buildkit - we also assume last one failed, so no need to tag prior
 debug-build:
 	DOCKER_BUILDKIT=0 docker build --tag $(image_to_use):debug .
@@ -77,7 +77,7 @@ run-edit:
 		& \
 		job_pid=$$! ; \
 		sleep 10 ; \
-		docker ps --filter "ancestor=$(image_to_use):$(github3_version)" ; \
+		docker ps --filter "ancestor=$(image_to_use)" ; \
 		wait $$job_pid ; \
 	) '
 
