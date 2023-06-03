@@ -4,6 +4,7 @@ cache/*\.json
 .cache
 # for poetry
 .venv
+venv
 # for jupyter notebooks
 .ipynb*
 .jupyter*
