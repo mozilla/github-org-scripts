@@ -11,11 +11,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.vscode-pylance",
 				"ms-python.python",
-				"ms-toolsai.jupyter-renderers",
 				"ms-toolsai.jupyter",
-				"ms-toolsai.vscode-jupyter-cell-tags"
 			]
 		}
 	}
